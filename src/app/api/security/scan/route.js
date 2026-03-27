@@ -57,11 +57,12 @@ const addCheck = (category, { status, severity = 'PASS', name, desc, penalty = 0
 const finalizeCategory = (category) => {
   const hasFail = category.checks.some((check) => check.status === 'FAIL');
   const hasWarn = category.checks.some((check) => check.status === 'WARN');
+  const hasOnlyInfo = category.checks.length > 0 && category.checks.every((check) => check.status === 'INFO');
 
   return {
     ...category,
     score: Math.max(0, Math.min(category.maxScore, category.score)),
-    status: hasFail ? 'FAIL' : hasWarn ? 'WARN' : 'PASS',
+    status: hasFail ? 'FAIL' : hasWarn || hasOnlyInfo ? 'WARN' : 'PASS',
   };
 };
 
@@ -437,7 +438,7 @@ export async function POST(req) {
 
       const documentResult = await fetchWithRedirects(finalTarget.toString(), { method: 'GET' });
       const documentHeaders = Object.fromEntries(documentResult.response.headers.entries());
-      const contentType = documentHeaders['content-type'] || '';
+      const documentContentType = documentHeaders['content-type'] || '';
       const setCookieHeaders =
         typeof documentResult.response.headers.getSetCookie === 'function'
           ? documentResult.response.headers.getSetCookie()
@@ -447,10 +448,10 @@ export async function POST(req) {
       headers = { ...headers, ...documentHeaders };
       httpStatus = documentResult.response.status;
       redirectCount = Math.max(redirectCount, documentResult.redirectCount);
-      contentType = documentHeaders['content-type'] || contentType;
+      contentType = documentContentType || contentType;
       cookiesSeen = setCookieHeaders.length;
 
-      if (contentType.includes('text/html')) {
+      if (documentContentType.includes('text/html')) {
         html = (await documentResult.response.text()).slice(0, HTML_CAPTURE_LIMIT);
       }
 
