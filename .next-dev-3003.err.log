@@ -1,0 +1,86 @@
+ ⨯ Error: Cannot find module './331.js'
+Require stack:
+- D:\TI\my-portfolio\.next\server\webpack-runtime.js
+- D:\TI\my-portfolio\.next\server\app\api\ai\chat\route.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\require.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\load-components.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\utils.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\swc\options.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\swc\index.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\analysis\parse-module.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\analysis\get-page-static-info.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\router-server.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (D:\TI\my-portfolio\.next\server\app\api\security\health-status\route.js:1:10177)
+    at Object.<anonymous> (D:\TI\my-portfolio\.next\server\app\api\security\health-status\route.js:1:10226) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/api/security/health-status'
+}
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expression expected
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:236:1]
+ [2m233[0m |       return;
+ [2m234[0m |     }
+ [2m235[0m |     
+ [2m236[0m |       .catch(err => setPitchContent(getAiErrorMessage(err)))
+     : [35;1m      ^[0m
+ [2m237[0m |       setPitchContent('Kuota AI harian Anda telah habis. Silakan coba lagi besok.');
+ [2m238[0m |       return;
+ [2m238[0m |     }
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expression expected
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:540:1]
+ [2m537[0m |         }
+ [2m538[0m |         }
+ [2m539[0m | 
+ [2m540[0m |         case 'ai': {
+     : [35;1m        ^^^^[0m
+ [2m541[0m |           if (!args[1]) {
+ [2m542[0m |             print('ai: masukkan pesan. Contoh: ai apa saja skill yang dimiliki?', 'error');
+ [2m542[0m |             break;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expression expected
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:540:1]
+ [2m537[0m |         }
+ [2m538[0m |         }
+ [2m539[0m | 
+ [2m540[0m |         case 'ai': {
+     : [35;1m        ^^^^[0m
+ [2m541[0m |           if (!args[1]) {
+ [2m542[0m |             print('ai: masukkan pesan. Contoh: ai apa saja skill yang dimiliki?', 'error');
+ [2m542[0m |             break;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from D:\TI\my-portfolio\src\app\page.jsx
+    1: The process cannot access the file because it is being used by another process. (os error 32)
+
+Import trace for requested module:
+./src/app/page.jsx
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'D:\TI\my-portfolio\.next\cache\webpack\client-development\3.pack.gz_' -> 'D:\TI\my-portfolio\.next\cache\webpack\client-development\3.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'D:\TI\my-portfolio\.next\cache\webpack\client-development\0.pack.gz_' -> 'D:\TI\my-portfolio\.next\cache\webpack\client-development\0.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'D:\TI\my-portfolio\.next\cache\webpack\client-development\0.pack.gz_' -> 'D:\TI\my-portfolio\.next\cache\webpack\client-development\0.pack.gz'

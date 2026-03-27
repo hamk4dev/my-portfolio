@@ -2,11 +2,16 @@ import { NextResponse } from 'next/server';
 
 import { getClientIp, isPrivateOrLocalIp } from '@/lib/server/network';
 import { consumeRateLimit } from '@/lib/server/rate-limit';
+import { hasValidTurnstileSession } from '@/lib/server/turnstile-session';
 
 export async function GET(req) {
   try {
+    if (!hasValidTurnstileSession(req)) {
+      return NextResponse.json({ error: 'Akses situs belum diverifikasi oleh Turnstile.' }, { status: 403 });
+    }
+
     const clientIp = getClientIp(req);
-    const rateLimit = consumeRateLimit(`ip:${clientIp}`, {
+    const rateLimit = await consumeRateLimit(`ip:${clientIp}`, {
       limit: 60,
       windowMs: 15 * 60 * 1000,
     });
@@ -49,3 +54,4 @@ export async function GET(req) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+

@@ -1,25 +1,91 @@
 import { NextResponse } from 'next/server';
 
+import { getScannerAllowedTargets, isScannerAllowedHostname, scannerPolicy } from '@/data/scanner-policy';
 import { getClientIp, normalizePublicTargetUrl, resolvePublicAddresses } from '@/lib/server/network';
 import { consumeRateLimit } from '@/lib/server/rate-limit';
+import { hasValidTurnstileSession } from '@/lib/server/turnstile-session';
 
-async function fetchHeadersWithRedirects(initialUrl, maxRedirects = 3) {
+const REQUEST_TIMEOUT_MS = 7000;
+const MAX_REDIRECTS = 3;
+const HTML_CAPTURE_LIMIT = 150000;
+const SCAN_INPUT_ERRORS = new Set([
+  'URL target tidak valid.',
+  'URL target wajib diisi.',
+  'Hanya protokol HTTP/HTTPS yang diizinkan.',
+  'Target localhost tidak diizinkan.',
+  'Target private/internal IP diblokir.',
+  'Gagal meresolusikan domain target.',
+  'Terlalu banyak redirect.',
+]);
+
+function buildScanErrorResponse(error) {
+  const message = error instanceof Error ? error.message : 'Internal Server Error';
+
+  if (SCAN_INPUT_ERRORS.has(message)) {
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
+
+  if (/timeout/i.test(message)) {
+    return NextResponse.json({ error: 'Target tidak merespons tepat waktu.' }, { status: 504 });
+  }
+
+  console.error('Web scanner route error:', error);
+  return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+}
+
+const createCategory = (id, name, maxScore) => ({
+  id,
+  name,
+  maxScore,
+  score: maxScore,
+  checks: [],
+});
+
+const addCheck = (category, { status, severity = 'PASS', name, desc, penalty = 0, source }) => {
+  category.checks.push({ status, severity, name, desc, source: source || category.name });
+
+  if ((status === 'FAIL' || status === 'WARN') && penalty > 0) {
+    category.score = Math.max(0, category.score - penalty);
+  }
+};
+
+const finalizeCategory = (category) => {
+  const hasFail = category.checks.some((check) => check.status === 'FAIL');
+  const hasWarn = category.checks.some((check) => check.status === 'WARN');
+
+  return {
+    ...category,
+    score: Math.max(0, Math.min(category.maxScore, category.score)),
+    status: hasFail ? 'FAIL' : hasWarn ? 'WARN' : 'PASS',
+  };
+};
+
+async function fetchWithRedirects(initialUrl, { method = 'HEAD', allowGetFallback = false } = {}) {
   let currentUrl = initialUrl;
 
-  for (let redirectCount = 0; redirectCount <= maxRedirects; redirectCount += 1) {
+  for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount += 1) {
     let response = await fetch(currentUrl, {
-      method: 'HEAD',
+      method,
       redirect: 'manual',
       cache: 'no-store',
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      headers:
+        method === 'GET'
+          ? {
+              Accept: 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8',
+            }
+          : undefined,
     });
 
-    if (response.status === 405 || response.status === 501) {
+    if (allowGetFallback && method === 'HEAD' && (response.status === 405 || response.status === 501)) {
       response = await fetch(currentUrl, {
         method: 'GET',
         redirect: 'manual',
         cache: 'no-store',
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        headers: {
+          Accept: 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8',
+        },
       });
     }
 
@@ -27,7 +93,7 @@ async function fetchHeadersWithRedirects(initialUrl, maxRedirects = 3) {
       const location = response.headers.get('location');
 
       if (!location) {
-        return { response, finalUrl: currentUrl };
+        return { response, finalUrl: currentUrl, redirectCount };
       }
 
       const nextUrl = normalizePublicTargetUrl(new URL(location, currentUrl).toString());
@@ -36,16 +102,227 @@ async function fetchHeadersWithRedirects(initialUrl, maxRedirects = 3) {
       continue;
     }
 
-    return { response, finalUrl: currentUrl };
+    return { response, finalUrl: currentUrl, redirectCount };
   }
 
   throw new Error('Terlalu banyak redirect.');
 }
 
+const parseCookies = (setCookieHeaders) =>
+  setCookieHeaders
+    .map((rawCookie) => {
+      const [namePart] = rawCookie.split(';');
+      const [name = 'cookie'] = namePart.split('=');
+      return {
+        name: name.trim(),
+        raw: rawCookie,
+        hasSecure: /;\s*secure(?:;|$)/i.test(rawCookie),
+        hasHttpOnly: /;\s*httponly(?:;|$)/i.test(rawCookie),
+        sameSite: rawCookie.match(/;\s*samesite=([^;]+)/i)?.[1]?.trim() || null,
+      };
+    })
+    .filter((cookie) => cookie.name);
+
+const analyzeHeadersCategory = (headersCategory, headers) => {
+  const csp = headers['content-security-policy'];
+  const xContentTypeOptions = headers['x-content-type-options'];
+  const xFrameOptions = headers['x-frame-options'];
+  const referrerPolicy = headers['referrer-policy'];
+  const permissionsPolicy = headers['permissions-policy'];
+
+  addCheck(headersCategory, {
+    status: csp ? 'PASS' : 'FAIL',
+    severity: csp ? 'PASS' : 'HIGH',
+    name: 'Content-Security-Policy',
+    desc: csp ? 'CSP aktif.' : 'Header CSP tidak ditemukan, mitigasi XSS dan isolasi konten melemah.',
+    penalty: csp ? 0 : 8,
+  });
+
+  addCheck(headersCategory, {
+    status: xContentTypeOptions ? 'PASS' : 'WARN',
+    severity: xContentTypeOptions ? 'PASS' : 'MEDIUM',
+    name: 'X-Content-Type-Options',
+    desc: xContentTypeOptions ? 'Proteksi MIME sniffing aktif.' : 'Header X-Content-Type-Options tidak ditemukan.',
+    penalty: xContentTypeOptions ? 0 : 4,
+  });
+
+  addCheck(headersCategory, {
+    status: xFrameOptions || csp?.includes('frame-ancestors') ? 'PASS' : 'WARN',
+    severity: xFrameOptions || csp?.includes('frame-ancestors') ? 'PASS' : 'MEDIUM',
+    name: 'Frame Embedding Control',
+    desc:
+      xFrameOptions || csp?.includes('frame-ancestors')
+        ? 'Kontrol clickjacking terdeteksi.'
+        : 'Tidak ada X-Frame-Options atau frame-ancestors pada CSP.',
+    penalty: xFrameOptions || csp?.includes('frame-ancestors') ? 0 : 5,
+  });
+
+  addCheck(headersCategory, {
+    status: referrerPolicy ? 'PASS' : 'WARN',
+    severity: referrerPolicy ? 'PASS' : 'MEDIUM',
+    name: 'Referrer-Policy',
+    desc: referrerPolicy ? `Referrer-Policy: ${referrerPolicy}` : 'Header Referrer-Policy tidak ditemukan.',
+    penalty: referrerPolicy ? 0 : 4,
+  });
+
+  addCheck(headersCategory, {
+    status: permissionsPolicy ? 'PASS' : 'WARN',
+    severity: permissionsPolicy ? 'PASS' : 'MEDIUM',
+    name: 'Permissions-Policy',
+    desc: permissionsPolicy ? 'Pembatasan akses browser API terdeteksi.' : 'Header Permissions-Policy tidak ditemukan.',
+    penalty: permissionsPolicy ? 0 : 4,
+  });
+};
+
+const analyzeExposureCategory = (exposureCategory, headers, cookies) => {
+  const xPoweredBy = headers['x-powered-by'];
+  const serverHeader = headers.server;
+
+  addCheck(exposureCategory, {
+    status: xPoweredBy ? 'FAIL' : 'PASS',
+    severity: xPoweredBy ? 'HIGH' : 'PASS',
+    name: 'X-Powered-By Disclosure',
+    desc: xPoweredBy ? `Header X-Powered-By membocorkan teknologi backend: ${xPoweredBy}` : 'Header X-Powered-By tidak terdeteksi.',
+    penalty: xPoweredBy ? 6 : 0,
+  });
+
+  addCheck(exposureCategory, {
+    status: serverHeader && /\d/.test(serverHeader) ? 'WARN' : 'PASS',
+    severity: serverHeader && /\d/.test(serverHeader) ? 'MEDIUM' : 'PASS',
+    name: 'Server Version Disclosure',
+    desc:
+      serverHeader && /\d/.test(serverHeader)
+        ? `Header Server memuat versi yang dapat dipakai untuk fingerprinting: ${serverHeader}`
+        : 'Header Server tidak membocorkan versi detail.',
+    penalty: serverHeader && /\d/.test(serverHeader) ? 4 : 0,
+  });
+
+  if (!cookies.length) {
+    addCheck(exposureCategory, {
+      status: 'INFO',
+      severity: 'PASS',
+      name: 'Cookie Session',
+      desc: 'Tidak ada cookie yang dikirim pada response awal, jadi unit cookie tidak diberi penalti.',
+    });
+    return;
+  }
+
+  const insecureCookies = cookies.filter(
+    (cookie) => !cookie.hasSecure || !cookie.hasHttpOnly || !cookie.sameSite
+  );
+
+  if (!insecureCookies.length) {
+    addCheck(exposureCategory, {
+      status: 'PASS',
+      severity: 'PASS',
+      name: 'Cookie Security Attributes',
+      desc: 'Cookie yang dikirim sudah memiliki atribut Secure, HttpOnly, dan SameSite.',
+    });
+    return;
+  }
+
+  const cookieSummary = insecureCookies
+    .map((cookie) => {
+      const missing = [];
+      if (!cookie.hasSecure) missing.push('Secure');
+      if (!cookie.hasHttpOnly) missing.push('HttpOnly');
+      if (!cookie.sameSite) missing.push('SameSite');
+      return `${cookie.name} (${missing.join(', ')})`;
+    })
+    .join('; ');
+
+  addCheck(exposureCategory, {
+    status: 'FAIL',
+    severity: 'HIGH',
+    name: 'Cookie Security Attributes',
+    desc: `Cookie tanpa atribut proteksi lengkap terdeteksi: ${cookieSummary}`,
+    penalty: Math.min(10, 4 + insecureCookies.length * 2),
+  });
+};
+
+const analyzeContentCategory = (contentCategory, html, finalTarget, headers) => {
+  if (!html) {
+    addCheck(contentCategory, {
+      status: 'INFO',
+      severity: 'PASS',
+      name: 'HTML Snapshot',
+      desc: 'Body HTML tidak dianalisis karena konten bukan text/html atau body tidak tersedia.',
+    });
+    return;
+  }
+
+  const csp = headers['content-security-policy'];
+  const mixedContentMatches =
+    finalTarget.protocol === 'https:'
+      ? html.match(/\b(?:src|href|action)=["']http:\/\//gi) || []
+      : [];
+  const inlineScriptCount = (html.match(/<script\b(?![^>]*\bsrc=)[^>]*>/gi) || []).length;
+  const inlineEventHandlerCount = (html.match(/\son[a-z]+\s*=/gi) || []).length;
+  const passwordFieldCount = (html.match(/<input[^>]+type=["']password["'][^>]*>/gi) || []).length;
+  const isDirectoryListing = /<title>\s*Index of\s*\//i.test(html);
+
+  addCheck(contentCategory, {
+    status: mixedContentMatches.length ? 'FAIL' : 'PASS',
+    severity: mixedContentMatches.length ? 'HIGH' : 'PASS',
+    name: 'Mixed Content',
+    desc: mixedContentMatches.length
+      ? `Ditemukan ${mixedContentMatches.length} referensi HTTP pada halaman HTTPS.`
+      : 'Tidak ada mixed content yang terdeteksi pada snapshot HTML.',
+    penalty: mixedContentMatches.length ? 10 : 0,
+  });
+
+  addCheck(contentCategory, {
+    status: inlineScriptCount > 0 && !csp ? 'WARN' : 'PASS',
+    severity: inlineScriptCount > 0 && !csp ? 'MEDIUM' : 'PASS',
+    name: 'Inline Script Without CSP',
+    desc:
+      inlineScriptCount > 0 && !csp
+        ? `Terdapat ${inlineScriptCount} inline script tanpa proteksi CSP.`
+        : 'Tidak ada kombinasi inline script berisiko yang terdeteksi.',
+    penalty: inlineScriptCount > 0 && !csp ? 4 : 0,
+  });
+
+  addCheck(contentCategory, {
+    status: inlineEventHandlerCount > 0 && !csp ? 'WARN' : 'PASS',
+    severity: inlineEventHandlerCount > 0 && !csp ? 'MEDIUM' : 'PASS',
+    name: 'Inline Event Handler Without CSP',
+    desc:
+      inlineEventHandlerCount > 0 && !csp
+        ? `Terdapat ${inlineEventHandlerCount} inline event handler tanpa proteksi CSP.`
+        : 'Tidak ada inline event handler berisiko yang terdeteksi.',
+    penalty: inlineEventHandlerCount > 0 && !csp ? 3 : 0,
+  });
+
+  addCheck(contentCategory, {
+    status: passwordFieldCount > 0 && finalTarget.protocol !== 'https:' ? 'FAIL' : 'PASS',
+    severity: passwordFieldCount > 0 && finalTarget.protocol !== 'https:' ? 'HIGH' : 'PASS',
+    name: 'Password Form Transport',
+    desc:
+      passwordFieldCount > 0 && finalTarget.protocol !== 'https:'
+        ? 'Form password ditemukan pada halaman tanpa HTTPS.'
+        : 'Tidak ada form password berisiko pada snapshot HTML.',
+    penalty: passwordFieldCount > 0 && finalTarget.protocol !== 'https:' ? 10 : 0,
+  });
+
+  addCheck(contentCategory, {
+    status: isDirectoryListing ? 'FAIL' : 'PASS',
+    severity: isDirectoryListing ? 'HIGH' : 'PASS',
+    name: 'Directory Listing Exposure',
+    desc: isDirectoryListing
+      ? 'Halaman menyerupai directory listing publik.'
+      : 'Tidak ada indikasi directory listing publik pada snapshot HTML.',
+    penalty: isDirectoryListing ? 6 : 0,
+  });
+};
+
 export async function POST(req) {
   try {
+    if (!hasValidTurnstileSession(req)) {
+      return NextResponse.json({ error: 'Akses situs belum diverifikasi oleh Turnstile.' }, { status: 403 });
+    }
+
     const clientIp = getClientIp(req);
-    const rateLimit = consumeRateLimit(`scan:${clientIp}`, {
+    const rateLimit = await consumeRateLimit(`scan:${clientIp}`, {
       limit: 30,
       windowMs: 15 * 60 * 1000,
     });
@@ -56,95 +333,176 @@ export async function POST(req) {
 
     const { url } = await req.json();
     const targetUrl = normalizePublicTargetUrl(url);
-    const resolvedAddresses = await resolvePublicAddresses(targetUrl.hostname);
 
-    let score = 100;
-    const issues = [
-      {
-        severity: 'PASS',
-        name: 'Resolusi DNS Aman',
-        desc: `Domain mengarah ke ${resolvedAddresses.join(', ')}`,
-        source: 'DNS Validator',
-      },
-    ];
-
-    try {
-      const { response, finalUrl } = await fetchHeadersWithRedirects(targetUrl.toString());
-      const headers = Object.fromEntries(response.headers.entries());
-      const finalTarget = new URL(finalUrl);
-
-      if (finalTarget.hostname !== targetUrl.hostname) {
-        issues.push({
-          severity: 'MEDIUM',
-          name: 'Redirect Antar Host',
-          desc: `Target mengarahkan ke host lain: ${finalTarget.hostname}`,
-          source: 'Redirect Validator',
-        });
-        score -= 10;
-      }
-
-      if (finalTarget.protocol !== 'https:') {
-        issues.push({
-          severity: 'HIGH',
-          name: 'HTTPS Tidak Aktif',
-          desc: 'Target akhir tidak menggunakan HTTPS.',
-          source: 'Transport Scanner',
-        });
-        score -= 25;
-      }
-
-      if (!headers['strict-transport-security']) {
-        issues.push({
-          severity: 'HIGH',
-          name: 'HSTS Tidak Aktif',
-          desc: 'Rentan terhadap downgrade dan MitM.',
-          source: 'Header Scanner',
-        });
-        score -= 20;
-      }
-
-      if (!headers['content-security-policy']) {
-        issues.push({
-          severity: 'MEDIUM',
-          name: 'CSP Tidak Ditemukan',
-          desc: 'Mitigasi XSS di browser menjadi lebih lemah.',
-          source: 'Header Scanner',
-        });
-        score -= 15;
-      }
-
-      if (!headers['x-content-type-options']) {
-        issues.push({
-          severity: 'MEDIUM',
-          name: 'X-Content-Type-Options Tidak Ditemukan',
-          desc: 'Browser dapat melakukan MIME sniffing.',
-          source: 'Header Scanner',
-        });
-        score -= 10;
-      }
-    } catch (error) {
-      issues.push({
-        severity: 'MEDIUM',
-        name: 'Koneksi Ditolak',
-        desc: 'Gagal mengambil header dari target dalam batas waktu yang aman.',
-        source: 'Header Scanner',
-      });
-      score -= 10;
+    if (!isScannerAllowedHostname(targetUrl.hostname)) {
+      return NextResponse.json(
+        {
+          error: `Domain ${targetUrl.toString()} tidak berada dalam daftar aman. Untuk mencegah pemindaian ilegal, engine ini dikunci. Apakah Anda pemilik domain ini dan ingin mengujinya?`,
+          code: 'DOMAIN_NOT_ALLOWED',
+          blockedTarget: targetUrl.toString(),
+          requestedHost: targetUrl.hostname,
+          policy: {
+            ...scannerPolicy,
+            allowedTargets: getScannerAllowedTargets(),
+          },
+        },
+        { status: 403 }
+      );
     }
 
-    const normalizedScore = Math.max(0, score);
-    const grade = normalizedScore >= 85 ? 'A' : normalizedScore >= 70 ? 'B' : normalizedScore >= 50 ? 'C' : 'F';
+    const dnsCategory = createCategory('dns', 'DNS & Target Validation', 10);
+    const transportCategory = createCategory('transport', 'Transport & Redirect', 25);
+    const headersCategory = createCategory('headers', 'Browser Security Headers', 25);
+    const exposureCategory = createCategory('exposure', 'Exposure & Cookies', 20);
+    const contentCategory = createCategory('content', 'Content Risk Signals', 20);
+
+    const resolvedAddresses = await resolvePublicAddresses(targetUrl.hostname);
+    addCheck(dnsCategory, {
+      status: 'PASS',
+      severity: 'PASS',
+      name: 'Public DNS Resolution',
+      desc: `Domain mengarah ke alamat publik: ${resolvedAddresses.join(', ')}`,
+    });
+
+    let finalTarget = targetUrl;
+    let headers = {};
+    let html = '';
+
+    try {
+      const headerResult = await fetchWithRedirects(targetUrl.toString(), {
+        method: 'HEAD',
+        allowGetFallback: true,
+      });
+
+      finalTarget = new URL(headerResult.finalUrl);
+      headers = Object.fromEntries(headerResult.response.headers.entries());
+
+      addCheck(transportCategory, {
+        status: finalTarget.hostname === targetUrl.hostname ? 'PASS' : 'WARN',
+        severity: finalTarget.hostname === targetUrl.hostname ? 'PASS' : 'MEDIUM',
+        name: 'Redirect Host Consistency',
+        desc:
+          finalTarget.hostname === targetUrl.hostname
+            ? 'Redirect akhir tetap berada pada host yang sama.'
+            : `Target diarahkan ke host lain: ${finalTarget.hostname}`,
+        penalty: finalTarget.hostname === targetUrl.hostname ? 0 : 5,
+      });
+
+      addCheck(transportCategory, {
+        status: finalTarget.protocol === 'https:' ? 'PASS' : 'FAIL',
+        severity: finalTarget.protocol === 'https:' ? 'PASS' : 'HIGH',
+        name: 'HTTPS Final Transport',
+        desc:
+          finalTarget.protocol === 'https:'
+            ? 'Transport akhir memakai HTTPS.'
+            : 'Target akhir tidak memakai HTTPS.',
+        penalty: finalTarget.protocol === 'https:' ? 0 : 15,
+      });
+
+      addCheck(transportCategory, {
+        status: headers['strict-transport-security'] ? 'PASS' : 'WARN',
+        severity: headers['strict-transport-security'] ? 'PASS' : 'MEDIUM',
+        name: 'Strict-Transport-Security',
+        desc: headers['strict-transport-security']
+          ? `HSTS aktif: ${headers['strict-transport-security']}`
+          : 'Header HSTS tidak ditemukan.',
+        penalty: headers['strict-transport-security'] ? 0 : 5,
+      });
+
+      analyzeHeadersCategory(headersCategory, headers);
+
+      const documentResult = await fetchWithRedirects(finalTarget.toString(), { method: 'GET' });
+      const documentHeaders = Object.fromEntries(documentResult.response.headers.entries());
+      const contentType = documentHeaders['content-type'] || '';
+      const setCookieHeaders =
+        typeof documentResult.response.headers.getSetCookie === 'function'
+          ? documentResult.response.headers.getSetCookie()
+          : [];
+
+      finalTarget = new URL(documentResult.finalUrl);
+      headers = { ...headers, ...documentHeaders };
+
+      if (contentType.includes('text/html')) {
+        html = (await documentResult.response.text()).slice(0, HTML_CAPTURE_LIMIT);
+      }
+
+      analyzeExposureCategory(exposureCategory, headers, parseCookies(setCookieHeaders));
+      analyzeContentCategory(contentCategory, html, finalTarget, headers);
+    } catch (error) {
+      addCheck(transportCategory, {
+        status: 'FAIL',
+        severity: 'HIGH',
+        name: 'Target Reachability',
+        desc: 'Backend tidak dapat mengambil response target dengan aman dalam batas waktu yang diizinkan.',
+        penalty: 20,
+      });
+
+      addCheck(headersCategory, {
+        status: 'INFO',
+        severity: 'PASS',
+        name: 'Header Analysis',
+        desc: 'Unit header tidak dapat diselesaikan karena target tidak responsif atau menolak request.',
+      });
+
+      addCheck(exposureCategory, {
+        status: 'INFO',
+        severity: 'PASS',
+        name: 'Exposure Analysis',
+        desc: 'Unit exposure dan cookie tidak dapat diselesaikan karena response target tidak tersedia.',
+      });
+
+      addCheck(contentCategory, {
+        status: 'INFO',
+        severity: 'PASS',
+        name: 'Content Snapshot',
+        desc: 'Snapshot HTML tidak tersedia sehingga analisis konten dilewati.',
+      });
+    }
+
+    const categories = [
+      finalizeCategory(dnsCategory),
+      finalizeCategory(transportCategory),
+      finalizeCategory(headersCategory),
+      finalizeCategory(exposureCategory),
+      finalizeCategory(contentCategory),
+    ];
+
+    const issues = categories.flatMap((category) =>
+      category.checks
+        .filter((check) => check.status === 'PASS' || check.status === 'WARN' || check.status === 'FAIL')
+        .map((check) => ({
+          severity: check.severity,
+          name: check.name,
+          desc: check.desc,
+          source: category.name,
+        }))
+    );
+
+    const score = categories.reduce((total, category) => total + category.score, 0);
+    const grade = score >= 85 ? 'A' : score >= 70 ? 'B' : score >= 55 ? 'C' : score >= 40 ? 'D' : 'F';
 
     return NextResponse.json({
-      target: targetUrl.hostname,
-      score: normalizedScore,
+      target: finalTarget.hostname,
+      score,
       grade,
+      summary: 'Ini adalah passive baseline assessment. Scanner tidak melakukan exploit aktif atau verifikasi kerentanan mendalam.',
+      methodology: [
+        'DNS & Target Validation memeriksa apakah host mengarah ke alamat publik yang aman untuk dipindai.',
+        'Transport & Redirect memeriksa HTTPS, redirect, dan HSTS.',
+        'Browser Security Headers memeriksa header yang relevan untuk isolasi browser.',
+        'Exposure & Cookies memeriksa kebocoran teknologi dan atribut keamanan cookie.',
+        'Content Risk Signals menganalisis snapshot HTML untuk sinyal risiko dasar, bukan exploit aktif.',
+      ],
+      categories,
       issues,
       highCount: issues.filter((issue) => issue.severity === 'HIGH').length,
       medCount: issues.filter((issue) => issue.severity === 'MEDIUM').length,
       lowCount: issues.filter((issue) => issue.severity === 'PASS').length,
     });
   } catch (error) {
-    return NextResponse.json({ error: error.message || 'API Error' }, { status: 400 });
+    return buildScanErrorResponse(error);
   }
 }
+
+
+

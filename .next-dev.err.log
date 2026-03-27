@@ -1,0 +1,488 @@
+Gemini API error: 403 {
+  "error": {
+    "code": 403,
+    "message": "Your API key was reported as leaked. Please use another API key.",
+    "status": "PERMISSION_DENIED"
+  }
+}
+
+ ⨯ Error: Cannot find module './chunks/vendor-chunks/next.js'
+Require stack:
+- D:\TI\my-portfolio\.next\server\webpack-runtime.js
+- D:\TI\my-portfolio\.next\server\app\api\security\email-auth\route.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\require.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\load-components.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\utils.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\swc\options.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\swc\index.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\analysis\parse-module.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\analysis\get-page-static-info.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\router-server.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (D:\TI\my-portfolio\.next\server\app\api\security\email-auth\route.js:273:47)
+    at Object.<anonymous> (D:\TI\my-portfolio\.next\server\app\api\security\email-auth\route.js:276:3) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/api/security/email-auth'
+}
+ ⨯ Error: Cannot find module './chunks/vendor-chunks/next.js'
+Require stack:
+- D:\TI\my-portfolio\.next\server\webpack-runtime.js
+- D:\TI\my-portfolio\.next\server\pages\_document.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\require.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\load-components.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\utils.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\swc\options.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\swc\index.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\analysis\parse-module.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\analysis\get-page-static-info.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\router-server.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (D:\TI\my-portfolio\.next\server\pages\_document.js:63:47)
+    at Object.<anonymous> (D:\TI\my-portfolio\.next\server\pages\_document.js:66:3) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ ⨯ Error: Cannot find module './chunks/vendor-chunks/next.js'
+Require stack:
+- D:\TI\my-portfolio\.next\server\webpack-runtime.js
+- D:\TI\my-portfolio\.next\server\app\api\ai\chat\route.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\require.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\load-components.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\utils.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\swc\options.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\swc\index.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\analysis\parse-module.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\analysis\get-page-static-info.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\router-server.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (D:\TI\my-portfolio\.next\server\app\api\ai\chat\route.js:229:47)
+    at Object.<anonymous> (D:\TI\my-portfolio\.next\server\app\api\ai\chat\route.js:232:3) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/api/ai/chat'
+}
+ ⨯ Error: Cannot find module './chunks/vendor-chunks/next.js'
+Require stack:
+- D:\TI\my-portfolio\.next\server\webpack-runtime.js
+- D:\TI\my-portfolio\.next\server\app\api\ai\chat\route.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\require.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\load-components.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\utils.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\swc\options.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\swc\index.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\analysis\parse-module.js
+- D:\TI\my-portfolio\node_modules\next\dist\build\analysis\get-page-static-info.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\router-server.js
+- D:\TI\my-portfolio\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (D:\TI\my-portfolio\.next\server\pages\_document.js:63:47)
+    at Object.<anonymous> (D:\TI\my-portfolio\.next\server\pages\_document.js:66:3) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected a semicolon
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:192:1]
+ [2m189[0m |   const hasProtectedAccess = siteAccessMode === 'verified';
+ [2m190[0m | 
+ [2m191[0m |   const getAccessLockedMessage = (feature = 'Fitur ini') =>
+ [2m192[0m |     ${feature} belum tersedia untuk sesi ini. Muat ulang halaman atau coba lagi sebentar lagi.;
+     : [35;1m     ^[0m
+ [2m193[0m | 
+ [2m194[0m |   const getAiUnavailableMessage = () => 'Fitur AI sedang tidak tersedia saat ini.';
+ [2m194[0m | 
+     `----
+  [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:414:1]
+ [2m411[0m |         case 'whoami': {
+ [2m412[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m413[0m |           if (!hasProtectedAccess) {
+ [2m414[0m |             print(whoami error: , 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m415[0m |             break;
+ [2m416[0m |           }
+ [2m416[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected a semicolon
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:192:1]
+ [2m189[0m |   const hasProtectedAccess = siteAccessMode === 'verified';
+ [2m190[0m | 
+ [2m191[0m |   const getAccessLockedMessage = (feature = 'Fitur ini') =>
+ [2m192[0m |     ${feature} belum tersedia untuk sesi ini. Muat ulang halaman atau coba lagi sebentar lagi.;
+     : [35;1m     ^[0m
+ [2m193[0m | 
+ [2m194[0m |   const getAiUnavailableMessage = () => 'Fitur AI sedang tidak tersedia saat ini.';
+ [2m194[0m | 
+     `----
+  [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:414:1]
+ [2m411[0m |         case 'whoami': {
+ [2m412[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m413[0m |           if (!hasProtectedAccess) {
+ [2m414[0m |             print(whoami error: , 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m415[0m |             break;
+ [2m416[0m |           }
+ [2m416[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected a semicolon
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:192:1]
+ [2m189[0m |   const hasProtectedAccess = siteAccessMode === 'verified';
+ [2m190[0m | 
+ [2m191[0m |   const getAccessLockedMessage = (feature = 'Fitur ini') =>
+ [2m192[0m |     ${feature} belum tersedia untuk sesi ini. Muat ulang halaman atau coba lagi sebentar lagi.;
+     : [35;1m     ^[0m
+ [2m193[0m | 
+ [2m194[0m |   const getAiUnavailableMessage = () => 'Fitur AI sedang tidak tersedia saat ini.';
+ [2m194[0m | 
+     `----
+  [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:414:1]
+ [2m411[0m |         case 'whoami': {
+ [2m412[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m413[0m |           if (!hasProtectedAccess) {
+ [2m414[0m |             print(whoami error: , 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m415[0m |             break;
+ [2m416[0m |           }
+ [2m416[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected a semicolon
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:192:1]
+ [2m189[0m |   const hasProtectedAccess = siteAccessMode === 'verified';
+ [2m190[0m | 
+ [2m191[0m |   const getAccessLockedMessage = (feature = 'Fitur ini') =>
+ [2m192[0m |     ${feature} belum tersedia untuk sesi ini. Muat ulang halaman atau coba lagi sebentar lagi.;
+     : [35;1m     ^[0m
+ [2m193[0m | 
+ [2m194[0m |   const getAiUnavailableMessage = () => 'Fitur AI sedang tidak tersedia saat ini.';
+ [2m194[0m | 
+     `----
+  [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:414:1]
+ [2m411[0m |         case 'whoami': {
+ [2m412[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m413[0m |           if (!hasProtectedAccess) {
+ [2m414[0m |             print(whoami error: , 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m415[0m |             break;
+ [2m416[0m |           }
+ [2m416[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:413:1]
+ [2m410[0m |         case 'whoami': {
+ [2m411[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m412[0m |           if (!hasProtectedAccess) {
+ [2m413[0m |             print(whoami error: , 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m414[0m |             break;
+ [2m415[0m |           }
+ [2m415[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:413:1]
+ [2m410[0m |         case 'whoami': {
+ [2m411[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m412[0m |           if (!hasProtectedAccess) {
+ [2m413[0m |             print(whoami error: , 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m414[0m |             break;
+ [2m415[0m |           }
+ [2m415[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:413:1]
+ [2m410[0m |         case 'whoami': {
+ [2m411[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m412[0m |           if (!hasProtectedAccess) {
+ [2m413[0m |             print(whoami error: , 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m414[0m |             break;
+ [2m415[0m |           }
+ [2m415[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:413:1]
+ [2m410[0m |         case 'whoami': {
+ [2m411[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m412[0m |           if (!hasProtectedAccess) {
+ [2m413[0m |             print(whoami error: , 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m414[0m |             break;
+ [2m415[0m |           }
+ [2m415[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:413:1]
+ [2m410[0m |         case 'whoami': {
+ [2m411[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m412[0m |           if (!hasProtectedAccess) {
+ [2m413[0m |             print(whoami error: , 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m414[0m |             break;
+ [2m415[0m |           }
+ [2m415[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:413:1]
+ [2m410[0m |         case 'whoami': {
+ [2m411[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m412[0m |           if (!hasProtectedAccess) {
+ [2m413[0m |             print(whoami error: , 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m414[0m |             break;
+ [2m415[0m |           }
+ [2m415[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:413:1]
+ [2m410[0m |         case 'whoami': {
+ [2m411[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m412[0m |           if (!hasProtectedAccess) {
+ [2m413[0m |             print(whoami error: , 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m414[0m |             break;
+ [2m415[0m |           }
+ [2m415[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:413:1]
+ [2m410[0m |         case 'whoami': {
+ [2m411[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m412[0m |           if (!hasProtectedAccess) {
+ [2m413[0m |             print(whoami error: , 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m414[0m |             break;
+ [2m415[0m |           }
+ [2m415[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:413:1]
+ [2m410[0m |         case 'whoami': {
+ [2m411[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m412[0m |           if (!hasProtectedAccess) {
+ [2m413[0m |             print(whoami error: , 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m414[0m |             break;
+ [2m415[0m |           }
+ [2m415[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:413:1]
+ [2m410[0m |         case 'whoami': {
+ [2m411[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m412[0m |           if (!hasProtectedAccess) {
+ [2m413[0m |             print(whoami error: , 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m414[0m |             break;
+ [2m415[0m |           }
+ [2m415[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:413:1]
+ [2m410[0m |         case 'whoami': {
+ [2m411[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m412[0m |           if (!hasProtectedAccess) {
+ [2m413[0m |             print(whoami error: ${getAccessLockedMessage('Fitur ini')}, 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m414[0m |             break;
+ [2m415[0m |           }
+ [2m415[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expected ',', got 'error'
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:413:1]
+ [2m410[0m |         case 'whoami': {
+ [2m411[0m |           print('Mengumpulkan informasi sistem lokal...', 'system');
+ [2m412[0m |           if (!hasProtectedAccess) {
+ [2m413[0m |             print(whoami error: ${getAccessLockedMessage('Fitur ini')}, 'error');
+     : [35;1m                         ^^^^^[0m
+ [2m414[0m |             break;
+ [2m415[0m |           }
+ [2m415[0m |           const userAgent = navigator.userAgent;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expression expected
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:236:1]
+ [2m233[0m |       return;
+ [2m234[0m |     }
+ [2m235[0m |     
+ [2m236[0m |       .catch(err => setPitchContent(getAiErrorMessage(err)))
+     : [35;1m      ^[0m
+ [2m237[0m |       setPitchContent('Kuota AI harian Anda telah habis. Silakan coba lagi besok.');
+ [2m238[0m |       return;
+ [2m238[0m |     }
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expression expected
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:540:1]
+ [2m537[0m |         }
+ [2m538[0m |         }
+ [2m539[0m | 
+ [2m540[0m |         case 'ai': {
+     : [35;1m        ^^^^[0m
+ [2m541[0m |           if (!args[1]) {
+ [2m542[0m |             print('ai: masukkan pesan. Contoh: ai apa saja skill yang dimiliki?', 'error');
+ [2m542[0m |             break;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/page.jsx
+Error:   [31mx[0m Expression expected
+     ,-[[36;1;4mD:\TI\my-portfolio\src\app\page.jsx[0m:540:1]
+ [2m537[0m |         }
+ [2m538[0m |         }
+ [2m539[0m | 
+ [2m540[0m |         case 'ai': {
+     : [35;1m        ^^^^[0m
+ [2m541[0m |           if (!args[1]) {
+ [2m542[0m |             print('ai: masukkan pesan. Contoh: ai apa saja skill yang dimiliki?', 'error');
+ [2m542[0m |             break;
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/page.jsx
+ ⨯ ./src/app/globals.css.webpack[javascript/auto]!=!./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[3]!./src/app/globals.css
+Error: EBUSY: resource busy or locked, open 'D:\TI\my-portfolio\src\app\page.jsx'
+    at async Promise.all (index 0)
+Import trace for requested module:
+./src/app/globals.css.webpack[javascript/auto]!=!./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[10].use[3]!./src/app/globals.css
+./src/app/globals.css
+ ⨯ ./src/components/EmailAuthAnalyzer.jsx
+Error: 
+
+Caused by:
+    0: Failed to read source code from D:\TI\my-portfolio\src\components\EmailAuthAnalyzer.jsx
+    1: The process cannot access the file because it is being used by another process. (os error 32)
+
+Import trace for requested module:
+./src/components/EmailAuthAnalyzer.jsx
+./src/app/page.jsx

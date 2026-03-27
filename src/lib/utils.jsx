@@ -13,7 +13,7 @@ export const resolvePath = (currentPathArray, pathString) => {
   if (!pathString || pathString === '~' || pathString === '/') return [];
   const parts = pathString.split('/').filter(Boolean);
   let newPath = pathString.startsWith('/') ? [] : [...currentPathArray];
-  
+
   for (const p of parts) {
     if (p === '.') continue;
     if (p === '..') newPath.pop();
@@ -54,7 +54,7 @@ export const renderDocumentContent = (content) => {
     if (line.startsWith('- ')) {
       return (
         <div key={index} className="flex items-start ml-2 sm:ml-4 mb-1.5">
-           <span className="text-emerald-500 mr-2 mt-0.5 opacity-70">›</span>
+           <span className="text-emerald-500 mr-2 mt-0.5 opacity-70">&gt;</span>
            <span className="flex-1">{formatInline(line.substring(2))}</span>
         </div>
       );

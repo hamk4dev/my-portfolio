@@ -1,0 +1,11 @@
+import { profileImagePath } from './constants';
+import { createFile } from './helpers';
+import { contactMarkdown } from '@/data/contact';
+
+export const rootFiles = {
+  'about.md': createFile(
+    `# Profil Lengkap\n\nHalo! Saya adalah seorang profesional dengan latar belakang Teknik Komputer dan Jaringan yang memiliki minat besar pada teknologi informasi, pengembangan perangkat lunak berbasis AI, dan analisis data. Saat ini saya juga aktif dalam pelayanan masyarakat dan administrasi desa.\n\n## PENGALAMAN KERJA\n**1. Kepala Seksi Kesejahteraan - Pemerintah Desa Ulu Baula (2022 - Sekarang)**\n- Melaksanakan pembangunan sarana prasarana desa (kesehatan, pendidikan, dll).\n- Pengelolaan data sosial (BLT, PKH, BPNT) secara tepat sasaran.\n- Menyusun dokumen perencanaan (RKPDes, RPJMDes) & Dokumen Pelaksanaan Anggaran (DPA).\n- Pemberdayaan UMKM, kelompok tani, pemuda, dan kemasyarakatan.\n\n**2. Kurir Ekspedisi dan Marketing (2021 - Awal 2022)**\n- Distribusi barang secara tepat waktu dan interaksi langsung dengan pelanggan.\n- Mendukung kegiatan pemasaran dan promosi produk di lapangan.\n\n## PENDIDIKAN\n- **SMKN 2 Kolaka (Eks SMKN 1 Baula)** | Teknik Komputer dan Jaringan (Lulus 2020)\n\n## KEAHLIAN UTAMA\n- **Hard Skill:** MS Office, Analisis Data Excel, Python, Golang, Jaringan (LAN, Mikrotik), Cyber Security Basic, Web/Desktop dev dengan AI Tools, Linux OS.\n- **Soft Skill:** Problem Solving, Berpikir Kritis, Manajemen Waktu, Komunikasi Efektif.\n\n## PROYEK & KARYA\n- **Mikrotik Voucher Tester:** Alat bantu pengujian voucher jaringan (GitHub).\n- **Init.CV Portfolio:** Eksperimen web interaktif sistem operasi mini.\n- **Web Perpustakaan & Recycle Center App:** Prototipe sistem informasi mandiri.\n\n## SERTIFIKAT & BAHASA\n- **Sertifikat:** Mahir MS Excel, Pelatihan Marketing (26 Hari), Backend Golang.\n- **Bahasa:** Indonesia (Aktif), Bugis (Aktif), Melayu (Aktif), Inggris (Dasar).`,
+    { image: profileImagePath }
+  ),
+  'contact.md': createFile(contactMarkdown, { app: 'contact-hub' }),
+};

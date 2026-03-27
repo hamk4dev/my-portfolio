@@ -2,10 +2,19 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Folder, FileText, Terminal, Monitor, ChevronRight, CornerDownLeft, Home, Search, List, ArrowLeft, Cpu, Layout, Rocket, Loader2 } from 'lucide-react';
+import ContactHub from '@/components/ContactHub';
+import EmailAuthAnalyzer from '@/components/EmailAuthAnalyzer';
+import GlobalTurnstileGate from '@/components/GlobalTurnstileGate';
 import WebSecurityScanner from '@/components/WebSecurityScanner';
 import { initialVFS } from '@/data/vfs';
 import { getNodeAtPath, resolvePath, renderDocumentContent } from '@/lib/utils';
-import { callGemini, runBackendWebScan, checkIPReputationOnBackend } from '@/services/api';
+import {
+  callGemini,
+  runBackendWebScan,
+  runEmailAuthAnalysis,
+  checkIPReputationOnBackend,
+  getSystemHealthOnBackend,
+} from '@/services/api';
 
 export default function PortfolioOS() {
   const vfs = initialVFS;
@@ -24,7 +33,9 @@ export default function PortfolioOS() {
   const [splitRatio, setSplitRatio] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const mainContainerRef = useRef(null);
-  const [time, setTime] = useState(new Date());
+  const [time, setTime] = useState(null);
+  const [systemHealth, setSystemHealth] = useState(null);
+  const [siteAccessMode, setSiteAccessMode] = useState('verifying');
 
   const [history, setHistory] = useState([
     { id: 0, type: 'system', text: 'Init.CV v1.0.0 initialized.' },
@@ -44,6 +55,13 @@ export default function PortfolioOS() {
     }, 100);
   };
 
+  const focusTerminalInput = (force = false) => {
+    if (!inputRef.current) return;
+    if (force || (typeof window !== 'undefined' && window.innerWidth >= 768)) {
+      inputRef.current.focus();
+    }
+  };
+
   useEffect(() => {
     const bootTimer = setTimeout(() => {
       setIsGenerating(false);
@@ -59,23 +77,56 @@ export default function PortfolioOS() {
 
   useEffect(() => {
     if (!isGenerating && !activeTask) {
-      inputRef.current?.focus();
+      focusTerminalInput();
       queueTerminalScroll();
     }
   }, [isGenerating, activeTask]);
 
   useEffect(() => {
+    setTime(new Date());
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const formattedTimeWITA = time.toLocaleTimeString('id-ID', {
-    timeZone: 'Asia/Makassar',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
+  useEffect(() => {
+    let isMounted = true;
+
+    getSystemHealthOnBackend()
+      .then((data) => {
+        if (isMounted) {
+          setSystemHealth(data);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setSystemHealth(null);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const refreshSystemHealth = () => {
+    getSystemHealthOnBackend()
+      .then((data) => {
+        setSystemHealth(data);
+      })
+      .catch(() => {
+        setSystemHealth(null);
+      });
+  };
+
+  const formattedTimeWITA = time
+    ? time.toLocaleTimeString('id-ID', {
+        timeZone: 'Asia/Makassar',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      })
+    : '--:--:--';
 
   const updateSplitRatio = (clientX, clientY) => {
     if (!mainContainerRef.current) return;
@@ -139,12 +190,66 @@ export default function PortfolioOS() {
     return context;
   };
 
-  const getPortfolioAiContext = () => getVfsContext(vfs).slice(0, 8000);
+  const getPortfolioAiContext = () => getVfsContext(vfs).slice(0, 7000);
+  const isAiAvailable = systemHealth?.services?.ai;
+  const hasProtectedAccess = siteAccessMode === 'verified';
+
+  const getAccessLockedMessage = (feature = 'Fitur ini') =>
+    `${feature} belum tersedia untuk sesi ini. Muat ulang halaman atau coba lagi sebentar lagi.`;
+  const getAiUnavailableMessage = () => 'Fitur AI sedang tidak tersedia saat ini.';
+
+  const getAiErrorMessage = (error) => {
+    if (error?.status === 413) return 'Permintaan AI terlalu panjang. Coba ringkas isi yang diminta.';
+    if (error?.status === 429) return 'Permintaan AI sedang padat. Coba lagi beberapa saat lagi.';
+    if (error?.status === 403) return getAccessLockedMessage('Fitur AI');
+    return getAiUnavailableMessage();
+  };
+
+
+  const getTerminalToolError = (tool, message) => `${tool} error: ${message}`;
+
+  const getTerminalSystemErrorMessage = () => 'Permintaan belum dapat diproses saat ini. Coba lagi sebentar lagi.';
+
+  const getWebscanErrorMessage = (error) => {
+    if (error?.code === 'DOMAIN_NOT_ALLOWED') {
+      return 'Target ini perlu ditinjau lebih dulu. Gunakan panel scanner untuk melihat detail dan mengirim permintaan izin.';
+    }
+
+    if (error?.status === 429) {
+      return 'Scanner sedang padat. Coba lagi beberapa saat lagi.';
+    }
+
+    return 'Scanner belum dapat dijalankan saat ini. Coba lagi sebentar lagi.';
+  };
+
+  const getMailauthErrorMessage = (error) => {
+    if (error?.code === 'DOMAIN_NOT_ALLOWED') {
+      return 'Domain ini perlu ditinjau lebih dulu. Gunakan panel analyzer untuk melihat detail dan mengirim permintaan izin.';
+    }
+
+    if (error?.status === 429) {
+      return 'Analyzer sedang padat. Coba lagi beberapa saat lagi.';
+    }
+
+    return 'Analyzer belum dapat dijalankan saat ini. Coba lagi sebentar lagi.';
+  };
+
 
   const handleGeneratePitch = () => {
     setShowPitchModal(true);
     setCopyFeedback('');
-    if (pitchContent) return; 
+    const canReusePitch = pitchContent && !/^(Fitur AI|Kuota AI|Permintaan AI|Elevator Pitch belum tersedia)/.test(pitchContent);
+    if (canReusePitch) return;
+
+    if (!hasProtectedAccess) {
+      setPitchContent(getAccessLockedMessage('Fitur AI')); 
+      return;
+    }
+
+    if (isAiAvailable === false) {
+      setPitchContent(getAiUnavailableMessage());
+      return;
+    }
     
     if (!checkRateLimit()) {
       setPitchContent('Kuota AI harian Anda telah habis. Silakan coba lagi besok.');
@@ -163,7 +268,7 @@ ATURAN SANGAT KETAT:
 
     callGemini(prompt, systemInstruction)
       .then(res => setPitchContent(res))
-      .catch(err => setPitchContent(`Gagal membuat pitch: ${err.message}`))
+      .catch(err => setPitchContent(getAiErrorMessage(err)))
       .finally(() => setIsGeneratingPitch(false));
   };
 
@@ -214,7 +319,10 @@ ATURAN SANGAT KETAT:
           print('  whoami   : Menampilkan identitas OS dan Jaringan Anda');
           
           print('\n[ SECURITY TOOLS ]');
-          print('  webscan <url>: Melakukan Web Security Scan (CLI Mode)');
+          print('  webscan <url>   : Menjalankan Web Security Scanner (CLI Mode)');
+          print('  mailauth <domain>: Menjalankan Email Auth Analyzer (CLI Mode)');
+          print('  open tools/webscan.app : Membuka Web Security Scanner di panel GUI');
+          print('  open tools/mailauth.app: Membuka Email Auth Analyzer di panel GUI');
           print('===================================================');
           break;
 
@@ -257,7 +365,10 @@ ATURAN SANGAT KETAT:
         }
 
         case 'back': {
-          if (currentPath.length > 0) {
+          if (selectedNode) {
+            setSelectedNode(null);
+            setAiSummary(null);
+          } else if (currentPath.length > 0) {
             setCurrentPath(currentPath.slice(0, -1));
             setSelectedNode(null);
             setAiSummary(null);
@@ -336,6 +447,10 @@ ATURAN SANGAT KETAT:
 
         case 'whoami': {
           print('Mengumpulkan informasi sistem lokal...', 'system');
+          if (!hasProtectedAccess) {
+            print(getTerminalToolError('whoami', getAccessLockedMessage('Fitur ini')), 'error');
+            break;
+          }
           const userAgent = navigator.userAgent;
           let osName = "Unknown OS";
           if (userAgent.indexOf("Win") !== -1) osName = "Windows";
@@ -400,29 +515,40 @@ ATURAN SANGAT KETAT:
 
         case 'webscan': {
           if (!args[1]) {
-             print('webscan: membutuhkan target URL. Contoh: webscan google.com', 'error');
+             print('webscan: masukkan target URL. Contoh: webscan testphp.vulnweb.com', 'error');
              break;
           }
           let target = args[1];
           if (!target.startsWith('http')) target = 'https://' + target;
 
+          if (!hasProtectedAccess) {
+             print(getTerminalToolError('webscan', getAccessLockedMessage('Fitur ini')), 'error');
+             break;
+          }
+
           setIsGenerating(true);
           setActiveTask('Backend Processing...');
 
           runBackendWebScan(target).then(res => {
-             // CLEAN & SILENT OUTPUT KETIKA BERHASIL (Tanpa Peringatan Simulasi)
              let output = [`\n[ TARGET: ${res.target} ]\n`];
              output.push(`[ HASIL AKHIR ]`);
              output.push(`Skor Keamanan : ${res.score}/100`);
              output.push(`Grade Keseluruhan : ${res.grade}`);
+             output.push(`Ringkasan      : ${res.summary}`);
+             output.push(`\n[ UNIT YANG DIUJI ]`);
+             res.categories?.forEach((category) => {
+                output.push(`${category.name} : ${category.score}/${category.maxScore} (${category.status})`);
+             });
              output.push(`\n[ LOG TEMUAN ]`);
              res.issues.forEach(i => {
                 output.push(`[${i.severity}] ${i.name}`);
              });
              setHistory(prev => [...prev, { id: Date.now(), type: 'output', text: output.join('\n') }]);
           }).catch(err => {
-             // Clean error handling
-             setHistory(prev => [...prev, { id: Date.now(), type: 'error', text: `[-] Eksekusi Gagal: ${err.message}` }]);
+             setHistory(prev => [
+               ...prev,
+               { id: Date.now(), type: 'error', text: getTerminalToolError('webscan', getWebscanErrorMessage(err)) },
+             ]);
           }).finally(() => {
              setIsGenerating(false);
              setActiveTask(null); 
@@ -431,20 +557,85 @@ ATURAN SANGAT KETAT:
           break;
         }
 
+        case 'mailauth': {
+          if (!args[1]) {
+             print('mailauth: masukkan domain. Contoh: mailauth example.com', 'error');
+             break;
+          }
+
+          if (!hasProtectedAccess) {
+             print(getTerminalToolError('mailauth', getAccessLockedMessage('Fitur ini')), 'error');
+             break;
+          }
+
+          setIsGenerating(true);
+          setActiveTask('DNS Analysis...');
+
+          runEmailAuthAnalysis(args[1]).then(res => {
+             let output = [`\n[ TARGET: ${res.domain} ]\n`];
+             output.push('[ HASIL AKHIR ]');
+             output.push(`SPF           : ${res.spf.status} (${res.spf.verdict})`);
+             output.push(`DMARC         : ${res.dmarc.status} (${res.dmarc.verdict})`);
+             output.push(`Resolver SPF  : ${res.resolvers?.spf || 'system'}`);
+             output.push(`Resolver DMARC: ${res.resolvers?.dmarc || 'system'}`);
+             output.push(`Ringkasan     : ${res.summary}`);
+             output.push('\n[ RAW DNS ]');
+
+             const spfRecords = res.rawDnsRecords?.spfTxtRecords || [];
+             const dmarcRecords = res.rawDnsRecords?.dmarcTxtRecords || [];
+
+             if (spfRecords.length) {
+               spfRecords.forEach((record, index) => {
+                 output.push(`SPF TXT #${index + 1} : ${record}`);
+               });
+             } else {
+               output.push('SPF TXT       : Tidak ada record TXT yang dikembalikan');
+             }
+
+             if (dmarcRecords.length) {
+               dmarcRecords.forEach((record, index) => {
+                 output.push(`DMARC TXT #${index + 1}: ${record}`);
+               });
+             } else {
+               output.push('DMARC TXT     : Tidak ada record TXT yang dikembalikan');
+             }
+
+             setHistory(prev => [...prev, { id: Date.now(), type: 'output', text: output.join('\n') }]);
+          }).catch(err => {
+             setHistory(prev => [
+               ...prev,
+               { id: Date.now(), type: 'error', text: getTerminalToolError('mailauth', getMailauthErrorMessage(err)) },
+             ]);
+          }).finally(() => {
+             setIsGenerating(false);
+             setActiveTask(null);
+             queueTerminalScroll();
+          });
+          break;
+        }
+
         case 'ai': {
           if (!args[1]) {
-            print('ai: membutuhkan pesan. Contoh: ai apa saja skill yang dimiliki?', 'error');
+            print('ai: masukkan pesan. Contoh: ai apa saja skill yang dimiliki?', 'error');
             break;
+          }
+          if (!hasProtectedAccess) {
+             print(getTerminalToolError('ai', getAccessLockedMessage('Fitur AI')), 'error');
+             break;
+          }
+          if (isAiAvailable === false) {
+             print(getTerminalToolError('ai', getAiUnavailableMessage()), 'error');
+             break;
           }
           const prompt = args.slice(1).join(' ');
           
           if (prompt.length > 200) {
-             print('ai error: Pesan terlalu panjang. Maksimal 200 karakter.', 'error');
+             print(getTerminalToolError('ai', 'Pesan terlalu panjang. Maksimal 200 karakter.'), 'error');
              break;
           }
 
           if (!checkRateLimit()) {
-             print('ai error: Kuota AI harian Anda (10/10) telah habis.', 'error');
+             print(getTerminalToolError('ai', 'Kuota AI harian Anda sudah habis. Coba lagi besok.'), 'error');
              break;
           }
 
@@ -471,7 +662,7 @@ ${portfolioData}
               setHistory(prev => [...prev, { id: Date.now(), type: 'ai_output', text: res }]);
             })
             .catch(err => {
-              setHistory(prev => [...prev, { id: Date.now(), type: 'error', text: `ai error: ${err.message}` }]);
+              setHistory(prev => [...prev, { id: Date.now(), type: 'error', text: getTerminalToolError('ai', getAiErrorMessage(err)) }]);
             })
             .finally(() => {
                setIsGenerating(false);
@@ -523,9 +714,8 @@ ${portfolioData}
           print(`Perintah tidak ditemukan: ${cmd}. Ketik "help" untuk bantuan.`, 'error');
       }
     } catch (err) {
-      print(`System Error: ${err.message}`, 'error');
+      print(getTerminalSystemErrorMessage(), 'error');
     }
-
     setHistory(newHistory);
   };
 
@@ -579,16 +769,18 @@ ${portfolioData}
     } else if (action === 'back') {
       executeCommand('back');
     }
-    inputRef.current?.focus();
   };
 
   const currentDirNode = getNodeAtPath(vfs, currentPath);
   const pathDisplay = currentPath.length === 0 ? '~' : `~/${currentPath.join('/')}`;
   const selectedNodeCacheKey = selectedNode?.path ?? selectedNode?.name ?? '';
+  const isContactApp = selectedNode?.app === 'contact-hub';
+  const isEmailAuthApp = selectedNode?.app === 'email-auth-analyzer';
   const isScannerApp = selectedNode?.app === 'web-security-scanner';
 
   return (
     <div className="flex flex-col h-[100dvh] bg-slate-950 text-slate-300 font-sans overflow-hidden">
+      <GlobalTurnstileGate onVerified={refreshSystemHealth} onAccessStateChange={setSiteAccessMode} />
       
       <header className="flex items-center justify-between px-3 sm:px-4 py-3 bg-slate-900 border-b border-slate-800 shadow-sm z-10 shrink-0">
         <div className="flex items-center space-x-2 overflow-hidden">
@@ -616,6 +808,12 @@ ${portfolioData}
         </div>
       </header>
 
+      {siteAccessMode === 'limited' && (
+        <div className="shrink-0 border-b border-amber-500/20 bg-amber-950/30 px-4 py-3 text-xs sm:text-sm text-amber-100">
+          Situs dibuka dalam mode terbatas. Beberapa fitur baru tersedia setelah akses penuh aktif.
+        </div>
+      )}
+
       <div className="md:hidden flex overflow-x-auto space-x-2 p-2 bg-slate-900 border-b border-slate-800 font-mono text-xs shrink-0 scrollbar-hide">
         <button onClick={() => handleGuiAction('home')} className="flex items-center px-3 py-1.5 bg-slate-800 rounded hover:bg-slate-700 whitespace-nowrap"><Home className="w-3 h-3 mr-1"/> Root</button>
         <button onClick={() => handleGuiAction('back')} className="flex items-center px-3 py-1.5 bg-slate-800 rounded hover:bg-slate-700 whitespace-nowrap"><ArrowLeft className="w-3 h-3 mr-1"/> Back</button>
@@ -636,7 +834,7 @@ ${portfolioData}
             Terminal
           </div>
           
-          <div className="flex-1 p-3 sm:p-4 overflow-y-auto min-h-0" onClick={() => inputRef.current?.focus()}>
+          <div className="flex-1 p-3 sm:p-4 overflow-y-auto min-h-0" onClick={() => focusTerminalInput(true)}>
             {history.map((line) => {
               if (line.type === 'ai_output') {
                 return (
@@ -732,7 +930,7 @@ ${portfolioData}
               <div className="bg-black/50 border border-slate-700/60 px-2.5 py-1 rounded shadow-inner flex items-center space-x-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
                 <span className="font-mono text-emerald-400 text-xs tracking-wider font-semibold">
-                  {formattedTimeWITA} WITA
+                  <span suppressHydrationWarning>{formattedTimeWITA}</span> WITA
                 </span>
               </div>
             </div>
@@ -754,6 +952,14 @@ ${portfolioData}
                           setAiSummary(summaryCache[selectedNodeCacheKey]);
                           return;
                         }
+                        if (!hasProtectedAccess) {
+                          setAiSummary(getAccessLockedMessage('Ringkasan AI')); 
+                          return;
+                        }
+                        if (isAiAvailable === false) {
+                          setAiSummary(getAiUnavailableMessage());
+                          return;
+                        }
                         if (!checkRateLimit()) {
                           setAiSummary('Kuota AI harian Anda telah habis. Silakan coba lagi besok.');
                           return;
@@ -766,7 +972,7 @@ ${portfolioData}
                             setAiSummary(res);
                             setSummaryCache(prev => ({ ...prev, [selectedNodeCacheKey]: res }));
                           })
-                          .catch(err => setAiSummary(`Error: ${err.message}`))
+                          .catch(err => setAiSummary(getAiErrorMessage(err)))
                           .finally(() => setIsGenerating(false));
                       }}
                       disabled={isGenerating}
@@ -797,8 +1003,12 @@ ${portfolioData}
                   </div>
                 )}
 
-                {isScannerApp ? (
-                  <WebSecurityScanner />
+                {isContactApp ? (
+                  <ContactHub systemHealth={systemHealth} siteAccessMode={siteAccessMode} />
+                ) : isEmailAuthApp ? (
+                  <EmailAuthAnalyzer siteAccessMode={siteAccessMode} />
+                ) : isScannerApp ? (
+                  <WebSecurityScanner siteAccessMode={siteAccessMode} />
                 ) : (
                   <div className="bg-slate-950 p-4 sm:p-6 rounded-lg border border-slate-800 shadow-inner flex flex-col sm:flex-row gap-4 sm:gap-6">
                     {selectedNode.image && (
@@ -943,3 +1153,12 @@ ${portfolioData}
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
