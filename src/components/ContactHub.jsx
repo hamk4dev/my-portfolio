@@ -39,7 +39,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
 
   const statusMessage = useMemo(() => {
     if (!accessReady || (healthLoaded && !contactConfigured)) {
-      return 'Form belum tersedia saat ini. Silakan hubungi saya melalui email.';
+      return 'Form belum tersedia saat ini.';
     }
 
     return '';
@@ -288,10 +288,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
             </div>
           )}
 
-          <div className="flex flex-col gap-3 border-t border-slate-800 pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="max-w-md text-xs leading-relaxed text-slate-500">
-              Jika form belum tersedia, hubungi saya melalui email.
-            </div>
+          <div className="flex flex-col gap-3 border-t border-slate-800 pt-4 sm:flex-row sm:items-center sm:justify-end">
             <button
               type="submit"
               disabled={isFormDisabled}

@@ -106,14 +106,18 @@ function RawDnsPanel({ title, query, records }) {
       </div>
       <div className="mt-3 rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
         <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Query DNS</div>
-        <div className="mt-2 break-all font-mono text-xs text-cyan-200">{query}</div>
+        <div className="mt-2 overflow-x-auto">
+          <div className="min-w-max font-mono text-[11px] leading-6 text-cyan-200">{query}</div>
+        </div>
       </div>
       <div className="mt-3 space-y-3">
         {records.length ? (
           records.map((record, index) => (
             <div key={`${query}-${index}`} className="rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
               <div className="text-xs uppercase tracking-[0.18em] text-slate-500">TXT #{index + 1}</div>
-              <pre className="mt-2 whitespace-pre-wrap break-words font-mono text-xs text-slate-200">{record}</pre>
+              <div className="mt-2 overflow-x-auto">
+                <pre className="min-w-max whitespace-pre font-mono text-[11px] leading-6 text-slate-200">{record}</pre>
+              </div>
             </div>
           ))
         ) : (
