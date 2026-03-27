@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getScannerAllowedTargets, isScannerAllowedHostname, scannerPolicy } from '@/data/scanner-policy';
 import { getClientIp, normalizePublicTargetUrl, resolvePublicAddresses } from '@/lib/server/network';
 import { consumeRateLimit } from '@/lib/server/rate-limit';
+import { assertJsonRequest, assertSameOriginRequest } from '@/lib/server/request-guards';
 import { hasValidTurnstileSession } from '@/lib/server/turnstile-session';
 
 const REQUEST_TIMEOUT_MS = 7000;
@@ -40,6 +41,10 @@ const createCategory = (id, name, maxScore) => ({
   score: maxScore,
   checks: [],
 });
+
+const setCategoryScore = (category, nextScore) => {
+  category.score = Math.max(0, Math.min(category.maxScore, nextScore));
+};
 
 const addCheck = (category, { status, severity = 'PASS', name, desc, penalty = 0, source }) => {
   category.checks.push({ status, severity, name, desc, source: source || category.name });
@@ -317,6 +322,9 @@ const analyzeContentCategory = (contentCategory, html, finalTarget, headers) => 
 
 export async function POST(req) {
   try {
+    assertSameOriginRequest(req);
+    assertJsonRequest(req);
+
     if (!hasValidTurnstileSession(req)) {
       return NextResponse.json({ error: 'Akses situs belum diverifikasi oleh Turnstile.' }, { status: 403 });
     }
@@ -367,6 +375,11 @@ export async function POST(req) {
     let finalTarget = targetUrl;
     let headers = {};
     let html = '';
+    let httpStatus = null;
+    let redirectCount = 0;
+    let contentType = '';
+    let cookiesSeen = 0;
+    let reachabilityIssue = '';
 
     try {
       const headerResult = await fetchWithRedirects(targetUrl.toString(), {
@@ -376,6 +389,17 @@ export async function POST(req) {
 
       finalTarget = new URL(headerResult.finalUrl);
       headers = Object.fromEntries(headerResult.response.headers.entries());
+      httpStatus = headerResult.response.status;
+      redirectCount = headerResult.redirectCount;
+      contentType = headers['content-type'] || '';
+
+      addCheck(transportCategory, {
+        status: httpStatus >= 200 && httpStatus < 400 ? 'PASS' : httpStatus < 500 ? 'WARN' : 'FAIL',
+        severity: httpStatus >= 200 && httpStatus < 400 ? 'PASS' : httpStatus < 500 ? 'MEDIUM' : 'HIGH',
+        name: 'HTTP Response Status',
+        desc: `Target merespons dengan status HTTP ${httpStatus}.`,
+        penalty: httpStatus >= 200 && httpStatus < 400 ? 0 : httpStatus < 500 ? 6 : 12,
+      });
 
       addCheck(transportCategory, {
         status: finalTarget.hostname === targetUrl.hostname ? 'PASS' : 'WARN',
@@ -421,6 +445,10 @@ export async function POST(req) {
 
       finalTarget = new URL(documentResult.finalUrl);
       headers = { ...headers, ...documentHeaders };
+      httpStatus = documentResult.response.status;
+      redirectCount = Math.max(redirectCount, documentResult.redirectCount);
+      contentType = documentHeaders['content-type'] || contentType;
+      cookiesSeen = setCookieHeaders.length;
 
       if (contentType.includes('text/html')) {
         html = (await documentResult.response.text()).slice(0, HTML_CAPTURE_LIMIT);
@@ -429,26 +457,32 @@ export async function POST(req) {
       analyzeExposureCategory(exposureCategory, headers, parseCookies(setCookieHeaders));
       analyzeContentCategory(contentCategory, html, finalTarget, headers);
     } catch (error) {
+      reachabilityIssue = error instanceof Error ? error.message : 'Target tidak dapat dihubungi.';
+      setCategoryScore(transportCategory, 0);
+      setCategoryScore(headersCategory, 0);
+      setCategoryScore(exposureCategory, 0);
+      setCategoryScore(contentCategory, 0);
+
       addCheck(transportCategory, {
         status: 'FAIL',
         severity: 'HIGH',
         name: 'Target Reachability',
-        desc: 'Backend tidak dapat mengambil response target dengan aman dalam batas waktu yang diizinkan.',
-        penalty: 20,
+        desc: `Backend tidak dapat mengambil response target secara aman: ${reachabilityIssue}.`,
+        penalty: 25,
       });
 
       addCheck(headersCategory, {
         status: 'INFO',
         severity: 'PASS',
         name: 'Header Analysis',
-        desc: 'Unit header tidak dapat diselesaikan karena target tidak responsif atau menolak request.',
+        desc: 'Unit header tidak dapat dinilai karena response target tidak tersedia.',
       });
 
       addCheck(exposureCategory, {
         status: 'INFO',
         severity: 'PASS',
         name: 'Exposure Analysis',
-        desc: 'Unit exposure dan cookie tidak dapat diselesaikan karena response target tidak tersedia.',
+        desc: 'Unit exposure dan cookie tidak dapat dinilai karena response target tidak tersedia.',
       });
 
       addCheck(contentCategory, {
@@ -480,19 +514,38 @@ export async function POST(req) {
 
     const score = categories.reduce((total, category) => total + category.score, 0);
     const grade = score >= 85 ? 'A' : score >= 70 ? 'B' : score >= 55 ? 'C' : score >= 40 ? 'D' : 'F';
+    const assessedCategories = categories.filter((category) =>
+      category.checks.some((check) => check.status !== 'INFO')
+    ).length;
+    const coverageLabel = reachabilityIssue
+      ? `Parsial (${assessedCategories}/${categories.length} unit)`
+      : `Penuh (${assessedCategories}/${categories.length} unit)`;
 
     return NextResponse.json({
       target: finalTarget.hostname,
       score,
       grade,
-      summary: 'Ini adalah passive baseline assessment. Scanner tidak melakukan exploit aktif atau verifikasi kerentanan mendalam.',
+      summary: reachabilityIssue
+        ? 'Ini adalah passive baseline assessment parsial. Sebagian unit tidak dapat dinilai karena response target tidak tersedia penuh di backend.'
+        : 'Ini adalah passive baseline assessment. Scanner tidak melakukan exploit aktif atau verifikasi kerentanan mendalam.',
       methodology: [
         'DNS & Target Validation memeriksa apakah host mengarah ke alamat publik yang aman untuk dipindai.',
-        'Transport & Redirect memeriksa HTTPS, redirect, dan HSTS.',
+        'Transport & Redirect memeriksa HTTPS, status response, redirect, dan HSTS.',
         'Browser Security Headers memeriksa header yang relevan untuk isolasi browser.',
         'Exposure & Cookies memeriksa kebocoran teknologi dan atribut keamanan cookie.',
         'Content Risk Signals menganalisis snapshot HTML untuk sinyal risiko dasar, bukan exploit aktif.',
       ],
+      analysisContext: {
+        inputTarget: targetUrl.toString(),
+        finalUrl: finalTarget.toString(),
+        httpStatus,
+        redirectCount,
+        contentType,
+        cookiesSeen,
+        htmlCaptured: Boolean(html),
+        coverageLabel,
+        reachabilityIssue,
+      },
       categories,
       issues,
       highCount: issues.filter((issue) => issue.severity === 'HIGH').length,

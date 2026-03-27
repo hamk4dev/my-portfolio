@@ -1,48 +1,42 @@
 export const scannerPolicy = {
   mode: 'allowlist_only',
-  title: 'Legal Pentest Lab Only',
+  title: 'Curated Legal Web Labs',
   summary:
-    'Engine scanner dikunci hanya untuk domain lab yang memang dipublikasikan untuk pengujian keamanan legal dan edukatif.',
+    'Engine scanner hanya aktif otomatis untuk target lab yang memang dipublikasikan untuk pengujian keamanan legal dan edukatif.',
   rationale:
-    'Pembatasan ini mencegah pemindaian pasif terhadap domain pihak ketiga tanpa izin dan menjaga tool tetap berada pada koridor penggunaan yang sah.',
+    'Pembatasan ini menjaga scanner tetap berada pada koridor passive baseline assessment dan mencegah pemindaian web ke domain produksi pihak ketiga tanpa otorisasi yang jelas.',
 };
 
 export const scannerAllowedTargets = [
   {
-    hostname: 'testphp.vulnweb.com',
-    label: 'Acunetix PHP Demo',
-    provider: 'Invicti / Acunetix',
-    notes: 'Aplikasi demo yang sengaja disediakan untuk latihan dan validasi scanner.',
-  },
-  {
-    hostname: 'testasp.vulnweb.com',
-    label: 'Acunetix ASP Demo',
-    provider: 'Invicti / Acunetix',
-    notes: 'Target latihan resmi untuk pengujian aplikasi berbasis ASP klasik.',
-  },
-  {
-    hostname: 'testaspnet.vulnweb.com',
-    label: 'Acunetix ASP.NET Demo',
-    provider: 'Invicti / Acunetix',
-    notes: 'Target latihan resmi untuk pengujian aplikasi berbasis ASP.NET.',
-  },
-  {
-    hostname: 'testhtml5.vulnweb.com',
-    label: 'Acunetix HTML5 Demo',
-    provider: 'Invicti / Acunetix',
-    notes: 'Target latihan resmi untuk aplikasi demo HTML5 yang disengaja rentan.',
-  },
-  {
-    hostname: 'zero.webappsecurity.com',
-    label: 'Zero WebAppSecurity Demo',
-    provider: 'Invicti / Acunetix',
-    notes: 'Aplikasi demo publik untuk pengujian keamanan yang legal.',
+    hostname: 'demo.owasp-juice.shop',
+    label: 'OWASP Juice Shop Demo',
+    provider: 'OWASP',
+    notes: 'Aplikasi demo modern yang sengaja rentan untuk latihan keamanan aplikasi web.',
   },
   {
     hostname: 'demo.testfire.net',
     label: 'Altoro Mutual Demo',
     provider: 'HCL AppScan Demo',
-    notes: 'Aplikasi demo publik yang umum dipakai untuk edukasi security testing.',
+    notes: 'Target demo publik yang sering dipakai untuk validasi scanner dan pembelajaran AppSec.',
+  },
+  {
+    hostname: 'testphp.vulnweb.com',
+    label: 'Invicti PHP Demo',
+    provider: 'Invicti / Acunetix',
+    notes: 'Aplikasi PHP demo yang sengaja disediakan untuk pengujian scanner secara legal.',
+  },
+  {
+    hostname: 'testhtml5.vulnweb.com',
+    label: 'Invicti HTML5 Demo',
+    provider: 'Invicti / Acunetix',
+    notes: 'Target demo publik untuk aplikasi HTML5 yang memang dirancang sebagai bahan uji.',
+  },
+  {
+    hostname: 'zero.webappsecurity.com',
+    label: 'Zero WebAppSecurity Demo',
+    provider: 'Invicti / Acunetix',
+    notes: 'Demo publik yang aman dipakai untuk edukasi security testing dan validasi baseline scanner.',
   },
 ];
 
@@ -58,4 +52,3 @@ export function isScannerAllowedHostname(hostname) {
 export function getScannerAllowedTargets() {
   return scannerAllowedTargets;
 }
-

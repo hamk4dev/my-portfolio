@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Folder, FileText, Terminal, Monitor, ChevronRight, CornerDownLeft, Home, Search, List, ArrowLeft, Cpu, Layout, Rocket, Loader2 } from 'lucide-react';
+import { Folder, FileText, Terminal, Monitor, ChevronRight, CornerDownLeft, Home, Search, List, ArrowLeft, Cpu, Layout, Rocket, Loader2, ShieldCheck } from 'lucide-react';
 import ContactHub from '@/components/ContactHub';
 import EmailAuthAnalyzer from '@/components/EmailAuthAnalyzer';
 import GlobalTurnstileGate from '@/components/GlobalTurnstileGate';
@@ -36,6 +36,7 @@ export default function PortfolioOS() {
   const [time, setTime] = useState(null);
   const [systemHealth, setSystemHealth] = useState(null);
   const [siteAccessMode, setSiteAccessMode] = useState('verifying');
+  const [turnstileReopenSignal, setTurnstileReopenSignal] = useState(0);
 
   const [history, setHistory] = useState([
     { id: 0, type: 'system', text: 'Init.CV v1.0.0 initialized.' },
@@ -116,6 +117,10 @@ export default function PortfolioOS() {
       .catch(() => {
         setSystemHealth(null);
       });
+  };
+
+  const requestFullAccess = () => {
+    setTurnstileReopenSignal((value) => value + 1);
   };
 
   const formattedTimeWITA = time
@@ -539,7 +544,7 @@ ATURAN SANGAT KETAT:
 
         case 'webscan': {
           if (!args[1]) {
-             print('webscan: masukkan target URL. Contoh: webscan testphp.vulnweb.com', 'error');
+             print('webscan: masukkan target URL. Contoh: webscan demo.owasp-juice.shop', 'error');
              break;
           }
           let target = args[1];
@@ -583,7 +588,7 @@ ATURAN SANGAT KETAT:
 
         case 'mailauth': {
           if (!args[1]) {
-             print('mailauth: masukkan domain. Contoh: mailauth example.com', 'error');
+             print('mailauth: masukkan domain. Contoh: mailauth cloudflare.com', 'error');
              break;
           }
 
@@ -806,7 +811,11 @@ ${portfolioData}
 
   return (
     <div className="flex flex-col h-[100dvh] bg-slate-950 text-slate-300 font-sans overflow-hidden">
-      <GlobalTurnstileGate onVerified={refreshSystemHealth} onAccessStateChange={setSiteAccessMode} />
+      <GlobalTurnstileGate
+        onVerified={refreshSystemHealth}
+        onAccessStateChange={setSiteAccessMode}
+        reopenSignal={turnstileReopenSignal}
+      />
       
       <header className="flex items-center justify-between px-3 sm:px-4 py-3 bg-slate-900 border-b border-slate-800 shadow-sm z-10 shrink-0">
         <div className="flex items-center space-x-2 overflow-hidden">
@@ -836,7 +845,17 @@ ${portfolioData}
 
       {siteAccessMode === 'limited' && (
         <div className="shrink-0 border-b border-amber-500/20 bg-amber-950/30 px-4 py-3 text-xs sm:text-sm text-amber-100">
-          Situs dibuka dalam mode terbatas. Beberapa fitur baru tersedia setelah akses penuh aktif.
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <span>Situs dibuka dalam mode terbatas. Beberapa fitur baru tersedia setelah akses penuh aktif.</span>
+            <button
+              type="button"
+              onClick={requestFullAccess}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-[11px] font-semibold text-amber-100 transition hover:bg-amber-400/20 sm:text-xs"
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Aktifkan Akses Penuh
+            </button>
+          </div>
         </div>
       )}
 

@@ -37,7 +37,7 @@ function isServiceIssue(error) {
   );
 }
 
-export default function GlobalTurnstileGate({ onVerified, onAccessStateChange }) {
+export default function GlobalTurnstileGate({ onVerified, onAccessStateChange, reopenSignal = 0 }) {
   const [sessionChecked, setSessionChecked] = useState(false);
   const [verified, setVerified] = useState(false);
   const [limitedMode, setLimitedMode] = useState(false);
@@ -50,6 +50,7 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
   const [manualRetryRequired, setManualRetryRequired] = useState(false);
   const onVerifiedRef = useRef(onVerified);
   const onAccessStateChangeRef = useRef(onAccessStateChange);
+  const reopenSignalRef = useRef(reopenSignal);
 
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '';
   const canContinueLimited =
@@ -75,6 +76,21 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
   useEffect(() => {
     onAccessStateChangeRef.current = onAccessStateChange;
   }, [onAccessStateChange]);
+
+  useEffect(() => {
+    if (reopenSignalRef.current === reopenSignal) {
+      return;
+    }
+
+    reopenSignalRef.current = reopenSignal;
+
+    if (verified) {
+      return;
+    }
+
+    setLimitedMode(false);
+    resetVerification();
+  }, [reopenSignal, verified]);
 
   useEffect(() => {
     if (!sessionChecked) {

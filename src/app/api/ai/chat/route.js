@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { getConfiguredGeminiApiKeys, getConfiguredGeminiModels } from '@/lib/server/gemini';
 import { getClientIp } from '@/lib/server/network';
 import { consumeRateLimit } from '@/lib/server/rate-limit';
 import { assertJsonRequest, assertSameOriginRequest } from '@/lib/server/request-guards';
@@ -7,7 +8,6 @@ import { hasValidTurnstileSession } from '@/lib/server/turnstile-session';
 
 export const runtime = 'nodejs';
 
-const DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash';
 const MAX_PROMPT_LENGTH = 12000;
 const MAX_SYSTEM_INSTRUCTION_LENGTH = 6000;
 
@@ -107,11 +107,6 @@ async function requestGemini({ apiKey, model, prompt, systemInstruction }) {
   }
 }
 
-function getCandidateModels() {
-  const configuredModel = process.env.GEMINI_MODEL?.trim();
-  return [...new Set([configuredModel, DEFAULT_GEMINI_MODEL].filter(Boolean))];
-}
-
 export async function POST(req) {
   try {
     assertSameOriginRequest(req);
@@ -146,9 +141,10 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Konten permintaan terlalu panjang.', code: 'prompt-too-long' }, { status: 413 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY?.trim();
+    const apiKeys = getConfiguredGeminiApiKeys();
+    const candidateModels = getConfiguredGeminiModels();
 
-    if (!apiKey || apiKey.startsWith('masukkan_')) {
+    if (!apiKeys.length) {
       return NextResponse.json(
         { error: 'Layanan AI sedang tidak tersedia saat ini.', code: 'gemini-api-key-missing' },
         { status: 503 }
@@ -157,22 +153,36 @@ export async function POST(req) {
 
     let lastFailure = null;
 
-    for (const model of getCandidateModels()) {
-      const result = await requestGemini({
-        apiKey,
-        model,
-        prompt: normalizedPrompt,
-        systemInstruction: normalizedSystemInstruction,
-      });
+    for (const apiKey of apiKeys) {
+      for (const model of candidateModels) {
+        const result = await requestGemini({
+          apiKey,
+          model,
+          prompt: normalizedPrompt,
+          systemInstruction: normalizedSystemInstruction,
+        });
 
-      if (result.ok) {
-        return NextResponse.json({ reply: result.reply, model: result.model });
-      }
+        if (result.ok) {
+          return NextResponse.json({ reply: result.reply, model: result.model });
+        }
 
-      lastFailure = result.failure;
+        lastFailure = result.failure;
 
-      if (lastFailure.code !== 'gemini-model-unavailable') {
-        break;
+        if (lastFailure.code === 'gemini-model-unavailable') {
+          continue;
+        }
+
+        if (
+          lastFailure.code === 'gemini-api-key-rejected' ||
+          lastFailure.code === 'gemini-permission-denied'
+        ) {
+          break;
+        }
+
+        return NextResponse.json(
+          { error: lastFailure.error, code: lastFailure.code },
+          { status: lastFailure.status }
+        );
       }
     }
 

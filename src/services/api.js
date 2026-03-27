@@ -62,7 +62,7 @@ export const callGemini = async (prompt, systemInstruction) => {
 };
 
 export const runBackendWebScan = async (targetUrl) => {
-  const response = await fetch('/api/security/scan', {
+  const response = await fetchWithTimeout('/api/security/scan', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url: targetUrl }),
@@ -76,7 +76,7 @@ export const runBackendWebScan = async (targetUrl) => {
 };
 
 export const runEmailAuthAnalysis = async (domain) => {
-  const response = await fetch('/api/security/email-auth', {
+  const response = await fetchWithTimeout('/api/security/email-auth', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ domain }),

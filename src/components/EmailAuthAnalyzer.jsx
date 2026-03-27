@@ -1,27 +1,19 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
+  BadgeCheck,
   Database,
   FileText,
   Loader2,
-  Lock,
   Mail,
   ShieldAlert,
   ShieldCheck,
   ShieldQuestion,
 } from 'lucide-react';
 
-import SecurityAccessRequestForm from '@/components/SecurityAccessRequestForm';
-import { emailAuthAllowedTargets, emailAuthPolicy } from '@/data/email-auth-policy';
-import { runEmailAuthAnalysis, submitScanAccessRequest } from '@/services/api';
-
-const initialRequestForm = {
-  name: '',
-  contact: '',
-  reason: '',
-  website: '',
-};
+import { emailAuthPolicy, emailAuthSuggestedTargets } from '@/data/email-auth-policy';
+import { runEmailAuthAnalysis } from '@/services/api';
 
 const severityStyles = {
   HIGH: {
@@ -41,16 +33,21 @@ const severityStyles = {
   },
 };
 
-function PolicyTargetList({ targets }) {
+function SampleDomainList({ targets, onPick }) {
   return (
     <div className="grid gap-3 lg:grid-cols-3">
       {targets.map((target) => (
-        <div key={target.hostname} className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+        <button
+          key={target.hostname}
+          type="button"
+          onClick={() => onPick(target.hostname)}
+          className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4 text-left transition hover:border-cyan-500/30 hover:bg-slate-950"
+        >
           <div className="font-semibold text-slate-100">{target.label}</div>
           <div className="mt-1 break-all font-mono text-xs text-cyan-300">{target.hostname}</div>
           <div className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">{target.provider}</div>
           <p className="mt-2 text-sm leading-relaxed text-slate-400">{target.notes}</p>
-        </div>
+        </button>
       ))}
     </div>
   );
@@ -62,7 +59,7 @@ function ResultCard({ title, result }) {
 
   return (
     <div className={`rounded-3xl border p-5 ${style.card}`}>
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <ResultIcon className="mt-0.5 h-5 w-5 shrink-0" />
           <div>
@@ -74,11 +71,24 @@ function ResultCard({ title, result }) {
           {result.status}
         </div>
       </div>
+
       <p className="mt-4 text-sm leading-relaxed text-slate-200/90">{result.summary}</p>
+
       {result.rawRecord && (
         <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
           <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Record yang dinilai</div>
           <pre className="mt-2 whitespace-pre-wrap break-words font-mono text-xs text-cyan-200">{result.rawRecord}</pre>
+        </div>
+      )}
+
+      {Array.isArray(result.rawMatches) && result.rawMatches.length > 1 && (
+        <div className="mt-4 space-y-2 rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
+          <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Record terkait</div>
+          {result.rawMatches.map((record, index) => (
+            <pre key={`${title}-${index}`} className="whitespace-pre-wrap break-words font-mono text-xs text-slate-200">
+              {record}
+            </pre>
+          ))}
         </div>
       )}
     </div>
@@ -93,7 +103,7 @@ function RawDnsPanel({ title, query, records }) {
         <div className="text-sm font-semibold">{title}</div>
       </div>
       <div className="mt-3 rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
-        <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Query</div>
+        <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Query DNS</div>
         <div className="mt-2 break-all font-mono text-xs text-cyan-200">{query}</div>
       </div>
       <div className="mt-3 space-y-3">
@@ -118,28 +128,14 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
   const [domain, setDomain] = useState('');
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
-  const [policyBlock, setPolicyBlock] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [requestForm, setRequestForm] = useState(initialRequestForm);
-  const [requestError, setRequestError] = useState('');
-  const [requestFeedback, setRequestFeedback] = useState('');
-  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
 
-  const allowedTargets = useMemo(
-    () => policyBlock?.policy?.allowedTargets || emailAuthAllowedTargets,
-    [policyBlock]
-  );
   const siteAccessVerified = siteAccessMode === 'verified';
 
   const handleDomainChange = (event) => {
     setDomain(event.target.value);
     setError('');
     setResult(null);
-    setRequestError('');
-    setRequestFeedback('');
-    if (policyBlock) {
-      setPolicyBlock(null);
-    }
   };
 
   const handleAnalyze = async (event) => {
@@ -159,61 +155,14 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
     setIsAnalyzing(true);
     setError('');
     setResult(null);
-    setPolicyBlock(null);
-    setRequestError('');
-    setRequestFeedback('');
 
     try {
       const data = await runEmailAuthAnalysis(normalizedDomain);
       setResult(data);
     } catch (analysisError) {
-      if (analysisError.code === 'DOMAIN_NOT_ALLOWED') {
-        setPolicyBlock(analysisError.data);
-        return;
-      }
-
       setError(analysisError.message);
     } finally {
       setIsAnalyzing(false);
-    }
-  };
-
-  const handleRequestFieldChange = (field) => (event) => {
-    const value = event.target.value;
-    setRequestForm((current) => ({
-      ...current,
-      [field]: value,
-    }));
-    setRequestError('');
-    setRequestFeedback('');
-  };
-
-  const handleRequestSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!policyBlock?.blockedTarget) {
-      setRequestError('Domain yang diblokir tidak tersedia. Jalankan analisis ulang terlebih dahulu.');
-      return;
-    }
-
-    setIsSubmittingRequest(true);
-    setRequestError('');
-    setRequestFeedback('');
-
-    try {
-      const response = await submitScanAccessRequest({
-        ...requestForm,
-        targetUrl: policyBlock.blockedTarget,
-        toolName: 'Passive Email Spoofing Analyzer (SPF/DMARC)',
-        targetType: 'domain',
-      });
-
-      setRequestFeedback(response.message || 'Pesan berhasil dikirim.');
-      setRequestForm(initialRequestForm);
-    } catch (submitError) {
-      setRequestError(submitError.message);
-    } finally {
-      setIsSubmittingRequest(false);
     }
   };
 
@@ -227,12 +176,12 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
               <span className="text-sm font-semibold uppercase tracking-[0.2em]">Email Auth Analyzer</span>
             </div>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-400">
-              Audit SPF dan DMARC dilakukan lewat query TXT DNS real-time, tanpa mengirim request HTTP ke target.
+              Audit SPF dan DMARC dilakukan lewat query TXT DNS publik secara real-time, tanpa request HTTP ke aplikasi target.
             </p>
           </div>
 
           <div className="rounded-2xl border border-cyan-500/20 bg-cyan-950/20 px-4 py-3 text-sm text-cyan-100/85 lg:max-w-sm">
-            Analyzer ini dibatasi untuk domain demonstrasi aman. Domain lain akan diarahkan ke form pesan untuk akses pengujian penuh.
+            Analyzer ini membaca DNS publik saja. Tidak ada crawl web, tidak ada simulasi email, dan tidak ada exploit aktif.
           </div>
         </div>
 
@@ -249,7 +198,7 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
             value={domain}
             onChange={handleDomainChange}
             disabled={!siteAccessVerified || isAnalyzing}
-            placeholder="Masukkan domain, misalnya example.com"
+            placeholder="Masukkan domain, misalnya cloudflare.com"
             className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
           />
           <button
@@ -263,7 +212,7 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
 
         {!siteAccessVerified && (
           <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-950/20 px-4 py-3 text-sm leading-relaxed text-amber-100/85">
-            Akses penuh belum aktif. Anda tetap bisa melihat target demonstrasi dan metodologi analyzer.
+            Akses penuh belum aktif. Anda tetap bisa melihat contoh domain publik dan metodologi analyzer.
           </div>
         )}
 
@@ -273,9 +222,9 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
           </div>
         )}
 
-        <details className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+        <details className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/60 p-4" open>
           <summary className="cursor-pointer list-none text-sm font-semibold text-slate-100">
-            Lihat target demonstrasi dan kebijakan analyzer
+            Metodologi dan contoh domain
           </summary>
           <div className="mt-4 space-y-4">
             <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-sm leading-relaxed text-slate-400">
@@ -283,38 +232,10 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
               <p className="mt-2">{emailAuthPolicy.summary}</p>
               <p className="mt-2">{emailAuthPolicy.rationale}</p>
             </div>
-            <PolicyTargetList targets={allowedTargets} />
+            <SampleDomainList targets={emailAuthSuggestedTargets} onPick={setDomain} />
           </div>
         </details>
       </section>
-
-      {policyBlock && (
-        <section className="space-y-4">
-          <div className="rounded-3xl border border-amber-500/30 bg-amber-950/20 p-5 sm:p-6">
-            <div className="flex items-start gap-3">
-              <Lock className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
-              <div>
-                <div className="text-sm font-semibold text-amber-200">Kirim pesan untuk mendapatkan akses pengujian penuh</div>
-                <p className="mt-2 text-sm leading-relaxed text-amber-100/85">Target ini belum tersedia untuk pengujian langsung dari tool ini. Jika Anda membutuhkan akses pengujian penuh, kirim pesan melalui form di bawah.</p>
-                <div className="mt-3 rounded-2xl border border-slate-700 bg-slate-950/60 px-3 py-3 text-xs text-slate-300">
-                  <div className="font-semibold text-slate-100">Target</div>
-                  <div className="mt-1 break-all font-mono text-amber-200">{policyBlock.blockedTarget}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <SecurityAccessRequestForm
-            formState={requestForm}
-            onFieldChange={handleRequestFieldChange}
-            onSubmit={handleRequestSubmit}
-            isSubmitting={isSubmittingRequest}
-            error={requestError}
-            feedback={requestFeedback}
-            description="Kirim pesan jika Anda membutuhkan akses pengujian penuh untuk target ini."
-          />
-        </section>
-      )}
 
       {isAnalyzing && (
         <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900/70 px-4 py-4 text-sm text-slate-300">
@@ -325,22 +246,49 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
 
       {result && (
         <div className="space-y-6">
-          <div className="grid gap-4 lg:grid-cols-2">
+          <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Target</div>
+                <div className="mt-2 break-all text-2xl font-semibold text-slate-100">{result.domain}</div>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:min-w-[320px]">
+                <div className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3">
+                  <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Resolver SPF</div>
+                  <div className="mt-2 text-sm font-semibold text-cyan-200">{result.resolvers?.spf || 'system'}</div>
+                </div>
+                <div className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3">
+                  <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Resolver DMARC</div>
+                  <div className="mt-2 text-sm font-semibold text-cyan-200">{result.resolvers?.dmarc || 'system'}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3 lg:grid-cols-3">
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3">
+                <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Ringkasan</div>
+                <div className="mt-2 text-sm leading-relaxed text-slate-300">{result.summary}</div>
+              </div>
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 lg:col-span-2">
+                <div className="flex items-center gap-2 text-slate-100">
+                  <BadgeCheck className="h-4 w-4 text-cyan-300" />
+                  <div className="text-sm font-semibold">Metodologi</div>
+                </div>
+                <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                  {result.methodology?.map((item, index) => (
+                    <div key={`${item}-${index}`} className="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-3 text-sm text-slate-300">
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div className="grid gap-4 xl:grid-cols-2">
             <ResultCard title="SPF Analysis" result={result.spf} />
             <ResultCard title="DMARC Analysis" result={result.dmarc} />
           </div>
-
-          <details className="rounded-3xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5" open>
-            <summary className="cursor-pointer list-none text-sm font-semibold text-slate-100">Ringkasan dan metodologi</summary>
-            <p className="mt-4 text-sm leading-relaxed text-slate-400">{result.summary}</p>
-            <div className="mt-4 space-y-2">
-              {result.methodology?.map((item, index) => (
-                <div key={`${item}-${index}`} className="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm text-slate-300">
-                  {item}
-                </div>
-              ))}
-            </div>
-          </details>
 
           <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
             <div className="flex items-center gap-2 text-slate-100">
@@ -368,6 +316,3 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
     </div>
   );
 }
-
-
-

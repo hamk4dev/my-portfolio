@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 
-import { emailAuthPolicy, getEmailAuthAllowedTargets, isEmailAuthAllowedHostname } from '@/data/email-auth-policy';
 import { normalizeDomainName } from '@/lib/server/domain';
 import { resolveTxtRecords } from '@/lib/server/dns';
 import { getClientIp } from '@/lib/server/network';
@@ -15,7 +14,7 @@ const EMAIL_AUTH_INPUT_ERRORS = new Set([
   'Masukkan nama domain saja tanpa http:// atau https://.',
   'Masukkan nama domain saja, tanpa path atau spasi tambahan.',
   'Masukkan nama domain, bukan alamat IP.',
-  'Domain harus memiliki nama host dan TLD, misalnya example.com.',
+  'Domain harus memiliki nama host dan TLD, misalnya domain-anda.com.',
   'Format nama domain tidak valid.',
 ]);
 
@@ -290,21 +289,6 @@ export async function POST(req) {
     const { domain } = await req.json();
     const normalizedDomain = normalizeDomainName(domain);
 
-    if (!isEmailAuthAllowedHostname(normalizedDomain)) {
-      return NextResponse.json(
-        {
-          error: `Domain ${normalizedDomain} tidak berada dalam daftar aman analyzer email. Untuk menjaga penggunaan tetap legal dan terkontrol, engine ini dikunci. Apakah Anda pemilik domain ini dan ingin mengauditnya?`,
-          code: 'DOMAIN_NOT_ALLOWED',
-          blockedTarget: normalizedDomain,
-          requestedHost: normalizedDomain,
-          policy: {
-            ...emailAuthPolicy,
-            allowedTargets: getEmailAuthAllowedTargets(),
-          },
-        },
-        { status: 403 }
-      );
-    }
 
     const mainRecordsResult = await resolveMainTxtRecords(normalizedDomain);
 
@@ -324,11 +308,11 @@ export async function POST(req) {
     return NextResponse.json({
       domain: normalizedDomain,
       summary:
-        'Engine ini melakukan passive DNS OSINT secara real-time. Resolver utama memakai dns.promises.resolveTxt, lalu otomatis beralih ke DNS-over-HTTPS hanya jika resolver runtime menolak atau timeout. Tidak ada request HTTP ke aplikasi target dan tidak ada simulasi pengiriman email.',
+        'Engine ini melakukan passive DNS audit secara real-time. Resolver utama memakai dns.promises.resolveTxt, lalu otomatis beralih ke DNS-over-HTTPS hanya jika resolver runtime menolak atau timeout. Tidak ada request HTTP ke aplikasi target dan tidak ada simulasi pengiriman email.',
       methodology: [
         'SPF dianalisis dari record TXT pada domain utama yang diawali v=spf1.',
         'DMARC dianalisis dari TXT pada subdomain _dmarc.[domain].',
-        'Bukti mentah ditampilkan apa adanya agar hasil dapat diverifikasi secara manual.',
+        'Bukti mentah TXT ditampilkan apa adanya agar hasil dapat diverifikasi secara manual.',
       ],
       resolvers: {
         spf: mainRecordsResult.resolver,

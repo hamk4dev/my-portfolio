@@ -1,43 +1,39 @@
 export const emailAuthPolicy = {
-  mode: 'allowlist_only',
-  title: 'Passive DNS OSINT With Legal Gate',
+  mode: 'public_dns_passive',
+  title: 'Passive Public DNS Audit',
   summary:
-    'Engine email security analyzer hanya aktif otomatis untuk domain demonstrasi yang aman. Domain lain memerlukan permintaan izin manual.',
+    'Analyzer ini membaca TXT DNS publik secara real-time untuk mengevaluasi SPF dan DMARC tanpa mengirim request HTTP ke target.',
   rationale:
-    'Secara teknis audit SPF dan DMARC hanya melakukan query DNS TXT pasif, tetapi kebijakan ini sengaja dipasang untuk menghindari penggunaan massal ke domain produksi tanpa otorisasi yang jelas.',
+    'Karena engine hanya melakukan query TXT DNS publik dan tidak menyentuh aplikasi web target, analyzer ini dapat dipakai untuk domain publik umum dengan rate limit dan validasi input yang tetap ketat.',
 };
 
-export const emailAuthAllowedTargets = [
+export const emailAuthSuggestedTargets = [
   {
-    hostname: 'example.com',
-    label: 'RFC 2606 Example .com',
-    provider: 'IANA Reserved Domain',
-    notes: 'Domain contoh resmi yang dicadangkan untuk dokumentasi dan pengujian aman.',
+    hostname: 'cloudflare.com',
+    label: 'Cloudflare',
+    provider: 'Public Domain Example',
+    notes: 'Contoh domain publik dengan konfigurasi email yang biasanya jelas untuk demonstrasi analisis SPF/DMARC.',
   },
   {
-    hostname: 'example.org',
-    label: 'RFC 2606 Example .org',
-    provider: 'IANA Reserved Domain',
-    notes: 'Domain contoh resmi yang aman dipakai untuk demonstrasi passive DNS lookup.',
+    hostname: 'openai.com',
+    label: 'OpenAI',
+    provider: 'Public Domain Example',
+    notes: 'Contoh domain publik lain yang relevan untuk melihat kebijakan email tingkat organisasi.',
   },
   {
-    hostname: 'example.net',
-    label: 'RFC 2606 Example .net',
-    provider: 'IANA Reserved Domain',
-    notes: 'Domain contoh resmi yang aman untuk edukasi dan pengujian konfigurasi dasar.',
+    hostname: 'proton.me',
+    label: 'Proton',
+    provider: 'Public Domain Example',
+    notes: 'Cocok untuk demonstrasi karena domain publik ini memang berfokus pada layanan email dan keamanan.',
   },
 ];
 
-const allowedHostnames = new Set(
-  emailAuthAllowedTargets.map((target) => target.hostname.toLowerCase())
-);
+export const emailAuthAllowedTargets = emailAuthSuggestedTargets;
 
 export function isEmailAuthAllowedHostname(hostname) {
-  if (typeof hostname !== 'string') return false;
-  return allowedHostnames.has(hostname.trim().toLowerCase());
+  return typeof hostname === 'string' && Boolean(hostname.trim());
 }
 
 export function getEmailAuthAllowedTargets() {
-  return emailAuthAllowedTargets;
+  return emailAuthSuggestedTargets;
 }
-

@@ -37,7 +37,7 @@ export function normalizeDomainName(rawValue) {
   const labels = asciiDomain.split('.');
 
   if (labels.length < 2) {
-    throw new Error('Domain harus memiliki nama host dan TLD, misalnya example.com.');
+    throw new Error('Domain harus memiliki nama host dan TLD, misalnya domain-anda.com.');
   }
 
   if (asciiDomain.length > 253 || labels.some((label) => !DOMAIN_LABEL_REGEX.test(label))) {
