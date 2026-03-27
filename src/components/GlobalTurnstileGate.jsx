@@ -11,7 +11,30 @@ function getGateFeedbackMessage(error) {
     return 'Percobaan terlalu sering. Coba lagi beberapa saat lagi.';
   }
 
+  if (error?.status === 502 || error?.status === 503 || error?.status === 504) {
+    return 'Pemeriksaan akses sedang sibuk. Anda bisa mencoba lagi atau melanjutkan dengan mode terbatas.';
+  }
+
+  if (error?.status === 403) {
+    return 'Verifikasi belum dapat dikonfirmasi. Silakan muat ulang pemeriksaan akses.';
+  }
+
   return 'Pemeriksaan akses belum berhasil. Silakan coba lagi.';
+}
+
+function isServiceIssue(error) {
+  return (
+    error?.status === 502 ||
+    error?.status === 503 ||
+    error?.status === 504 ||
+    [
+      'turnstile-missing-secret',
+      'turnstile-session-unavailable',
+      'turnstile-unreachable',
+      'turnstile-timeout',
+      'turnstile-invalid-response',
+    ].includes(error?.code)
+  );
 }
 
 export default function GlobalTurnstileGate({ onVerified, onAccessStateChange }) {
@@ -24,6 +47,7 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
   const [feedback, setFeedback] = useState('');
   const [widgetState, setWidgetState] = useState({ status: 'idle', message: '' });
   const [serviceIssue, setServiceIssue] = useState('');
+  const [manualRetryRequired, setManualRetryRequired] = useState(false);
   const onVerifiedRef = useRef(onVerified);
   const onAccessStateChangeRef = useRef(onAccessStateChange);
 
@@ -33,6 +57,16 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
     widgetState.status === 'missing-config' ||
     widgetState.status === 'unavailable' ||
     Boolean(serviceIssue);
+  const showActionPanel = manualRetryRequired || canContinueLimited;
+
+  const resetVerification = () => {
+    setFeedback('');
+    setServiceIssue('');
+    setTurnstileToken('');
+    setManualRetryRequired(false);
+    setResetKey((value) => value + 1);
+    setWidgetState({ status: siteKey ? 'loading' : 'missing-config', message: '' });
+  };
 
   useEffect(() => {
     onVerifiedRef.current = onVerified;
@@ -85,7 +119,7 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
   }, []);
 
   useEffect(() => {
-    if (!turnstileToken || verified || limitedMode) return;
+    if (!turnstileToken || verified || limitedMode || manualRetryRequired) return;
 
     let cancelled = false;
 
@@ -98,15 +132,18 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
         await verifyTurnstileSiteAccess(turnstileToken);
         if (cancelled) return;
         setVerified(true);
+        setManualRetryRequired(false);
         onVerifiedRef.current?.();
       } catch (error) {
         if (cancelled) return;
+
         setFeedback(getGateFeedbackMessage(error));
         setTurnstileToken('');
-        setResetKey((value) => value + 1);
+        setManualRetryRequired(true);
 
-        if (error.status === 502 || error.status === 503 || error.status === 504) {
-          setServiceIssue('Pemeriksaan akses sementara tidak tersedia. Anda tetap membuka situs dalam mode terbatas.');
+        if (isServiceIssue(error)) {
+          setServiceIssue('Pemeriksaan akses penuh di server sedang tidak tersedia. Anda bisa mencoba lagi nanti atau melanjutkan dengan mode terbatas.');
+          return;
         }
       } finally {
         if (!cancelled) {
@@ -120,7 +157,7 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
     return () => {
       cancelled = true;
     };
-  }, [limitedMode, turnstileToken, verified]);
+  }, [limitedMode, manualRetryRequired, turnstileToken, verified]);
 
   if (verified || limitedMode) return null;
 
@@ -134,7 +171,7 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
           <div>
             <h2 className="text-xl font-semibold text-slate-100">Pemeriksaan Akses</h2>
             <p className="mt-2 text-sm leading-relaxed text-slate-400">
-              Situs ini menjalankan pemeriksaan akses keamanan singkat.
+              Situs ini menjalankan pemeriksaan akses keamanan singkat sebelum akses penuh dibuka.
             </p>
           </div>
         </div>
@@ -168,14 +205,18 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
               </div>
             )}
 
-            {canContinueLimited && (
+            {showActionPanel && (
               <div className="rounded-2xl border border-amber-500/30 bg-amber-950/20 p-4">
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
                   <div>
-                    <div className="text-sm font-semibold text-amber-200">Mode Terbatas Tersedia</div>
+                    <div className="text-sm font-semibold text-amber-200">
+                      {canContinueLimited ? 'Mode Terbatas Tersedia' : 'Pemeriksaan Perlu Diulang'}
+                    </div>
                     <p className="mt-2 text-sm leading-relaxed text-amber-100/85">
-                      {serviceIssue || widgetState.message || 'Pemeriksaan akses belum tersedia sepenuhnya di browser ini. Anda tetap bisa membuka situs dalam mode terbatas, tetapi beberapa fitur belum aktif.'}
+                      {serviceIssue ||
+                        widgetState.message ||
+                        'Pemeriksaan akses perlu dijalankan ulang sebelum akses penuh dibuka.'}
                     </p>
                   </div>
                 </div>
@@ -183,24 +224,20 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
                   <button
                     type="button"
-                    onClick={() => {
-                      setFeedback('');
-                      setServiceIssue('');
-                      setTurnstileToken('');
-                      setResetKey((value) => value + 1);
-                      setWidgetState({ status: siteKey ? 'loading' : 'missing-config', message: '' });
-                    }}
+                    onClick={resetVerification}
                     className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800"
                   >
                     Coba Lagi
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setLimitedMode(true)}
-                    className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm font-medium text-amber-200 transition hover:bg-amber-500/20"
-                  >
-                    Buka Mode Terbatas
-                  </button>
+                  {canContinueLimited && (
+                    <button
+                      type="button"
+                      onClick={() => setLimitedMode(true)}
+                      className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm font-medium text-amber-200 transition hover:bg-amber-500/20"
+                    >
+                      Buka Mode Terbatas
+                    </button>
+                  )}
                 </div>
               </div>
             )}
@@ -210,6 +247,3 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
     </div>
   );
 }
-
-
-

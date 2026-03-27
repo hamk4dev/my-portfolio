@@ -46,9 +46,9 @@ function PolicyTargetList({ targets }) {
   return (
     <div className="grid gap-3 lg:grid-cols-3">
       {targets.map((target) => (
-        <div key={target.hostname} className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+        <div key={target.hostname} className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
           <div className="font-semibold text-slate-100">{target.label}</div>
-          <div className="mt-1 font-mono text-xs text-cyan-300">{target.hostname}</div>
+          <div className="mt-1 break-all font-mono text-xs text-cyan-300">{target.hostname}</div>
           <div className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">{target.provider}</div>
           <p className="mt-2 text-sm leading-relaxed text-slate-400">{target.notes}</p>
         </div>
@@ -62,7 +62,7 @@ function ResultCard({ title, result }) {
   const ResultIcon = style.Icon;
 
   return (
-    <div className={`rounded-2xl border p-5 ${style.card}`}>
+    <div className={`rounded-3xl border p-5 ${style.card}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <ResultIcon className="mt-0.5 h-5 w-5 shrink-0" />
@@ -77,8 +77,8 @@ function ResultCard({ title, result }) {
       </div>
       <p className="mt-4 text-sm leading-relaxed text-slate-200/90">{result.summary}</p>
       {result.rawRecord && (
-        <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/70 p-3">
-          <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Record yang Dinilai</div>
+        <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
+          <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Record yang dinilai</div>
           <pre className="mt-2 whitespace-pre-wrap break-words font-mono text-xs text-cyan-200">{result.rawRecord}</pre>
         </div>
       )}
@@ -93,20 +93,20 @@ function RawDnsPanel({ title, query, records }) {
         <Database className="h-4 w-4 text-cyan-300" />
         <div className="text-sm font-semibold">{title}</div>
       </div>
-      <div className="mt-3 rounded-xl border border-slate-800 bg-slate-950/70 p-3">
+      <div className="mt-3 rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
         <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Query</div>
         <div className="mt-2 break-all font-mono text-xs text-cyan-200">{query}</div>
       </div>
       <div className="mt-3 space-y-3">
         {records.length ? (
           records.map((record, index) => (
-            <div key={`${query}-${index}`} className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
+            <div key={`${query}-${index}`} className="rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
               <div className="text-xs uppercase tracking-[0.18em] text-slate-500">TXT #{index + 1}</div>
               <pre className="mt-2 whitespace-pre-wrap break-words font-mono text-xs text-slate-200">{record}</pre>
             </div>
           ))
         ) : (
-          <div className="rounded-xl border border-dashed border-slate-700 bg-slate-950/60 p-3 text-sm text-slate-400">
+          <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-950/60 p-3 text-sm text-slate-400">
             Tidak ada TXT record yang dikembalikan untuk query ini.
           </div>
         )}
@@ -147,7 +147,7 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
     event.preventDefault();
 
     if (!siteAccessVerified) {
-      setError('Analyzer DNS belum tersedia untuk sesi ini. Muat ulang halaman atau coba lagi sebentar lagi.');
+      setError('Analyzer belum tersedia untuk sesi ini. Coba lagi setelah akses penuh aktif.');
       return;
     }
 
@@ -219,84 +219,86 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-700 bg-slate-950 p-4 shadow-inner sm:p-6">
-      <div className="mb-6 flex flex-col gap-2 border-b border-slate-800 pb-4">
-        <div className="flex items-center gap-2 text-cyan-300">
-          <Mail className="h-5 w-5" />
-          <span className="text-sm font-semibold uppercase tracking-[0.2em]">
-            Email Auth Analyzer
-          </span>
-        </div>
-        <p className="max-w-3xl text-sm leading-relaxed text-slate-400">
-          Tool ini menjalankan passive OSINT nyata dengan query TXT DNS real-time untuk mengevaluasi SPF dan DMARC.
-          Tidak ada HTTP request ke target dan tidak ada simulasi kirim email. Bukti mentah TXT record wajib ditampilkan
-          agar hasilnya bisa diverifikasi manual.
-        </p>
-      </div>
-
-      <div className="mb-6 rounded-2xl border border-cyan-500/20 bg-cyan-950/20 p-4">
-        <div className="flex items-start gap-3">
-          <Lock className="mt-0.5 h-5 w-5 shrink-0 text-cyan-300" />
+    <div className="space-y-6">
+      <section className="rounded-3xl border border-slate-800 bg-slate-950 p-5 shadow-inner sm:p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <div className="text-sm font-semibold text-cyan-200">Kebijakan Legal Analyzer</div>
-            <p className="mt-2 text-sm leading-relaxed text-cyan-100/80">{emailAuthPolicy.summary}</p>
-            <p className="mt-2 text-sm leading-relaxed text-cyan-100/70">{emailAuthPolicy.rationale}</p>
+            <div className="flex items-center gap-2 text-cyan-300">
+              <Mail className="h-5 w-5" />
+              <span className="text-sm font-semibold uppercase tracking-[0.2em]">Email Auth Analyzer</span>
+            </div>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-400">
+              Audit SPF dan DMARC dilakukan lewat query TXT DNS real-time, tanpa mengirim request HTTP ke target.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-cyan-500/20 bg-cyan-950/20 px-4 py-3 text-sm text-cyan-100/85 lg:max-w-sm">
+            Analyzer ini dibatasi untuk domain demonstrasi aman. Domain lain akan diarahkan ke review manual.
           </div>
         </div>
-      </div>
 
-      <div className="mb-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-        <div className="mb-4 text-sm font-semibold text-slate-100">Domain Demonstrasi Yang Diizinkan</div>
-        <PolicyTargetList targets={allowedTargets} />
-      </div>
+        <form className="mt-6 flex flex-col gap-3 sm:flex-row" onSubmit={handleAnalyze}>
+          <label className="sr-only" htmlFor="email-auth-domain">
+            Domain Target
+          </label>
+          <input
+            id="email-auth-domain"
+            type="text"
+            inputMode="url"
+            autoComplete="off"
+            spellCheck="false"
+            value={domain}
+            onChange={handleDomainChange}
+            disabled={!siteAccessVerified || isAnalyzing}
+            placeholder="Masukkan domain, misalnya example.com"
+            className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+          />
+          <button
+            type="submit"
+            disabled={!siteAccessVerified || isAnalyzing}
+            className="inline-flex items-center justify-center rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Analisis DNS'}
+          </button>
+        </form>
 
-      {!siteAccessVerified && (
-        <div className="mb-6 rounded-2xl border border-amber-500/30 bg-amber-950/20 p-4 text-sm leading-relaxed text-amber-100/85">
-Analyzer DNS baru tersedia setelah akses penuh aktif. Selama mode terbatas, Anda tetap bisa membaca metodologi dan kebijakan legal, tetapi query backend belum dijalankan.
-        </div>
-      )}
+        {!siteAccessVerified && (
+          <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-950/20 px-4 py-3 text-sm leading-relaxed text-amber-100/85">
+            Akses penuh belum aktif. Anda tetap bisa melihat target demonstrasi dan metodologi analyzer.
+          </div>
+        )}
 
-      <form className="flex flex-col gap-3 sm:flex-row" onSubmit={handleAnalyze}>
-        <label className="sr-only" htmlFor="email-auth-domain">
-          Domain Target
-        </label>
-        <input
-          id="email-auth-domain"
-          type="text"
-          inputMode="url"
-          autoComplete="off"
-          spellCheck="false"
-          value={domain}
-          onChange={handleDomainChange}
-          disabled={!siteAccessVerified || isAnalyzing}
-          placeholder="Masukkan domain, misalnya example.com"
-          className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
-        />
-        <button
-          type="submit"
-          disabled={!siteAccessVerified || isAnalyzing}
-          className="inline-flex items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-200 transition hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Analisis DNS'}
-        </button>
-      </form>
+        {error && (
+          <div className="mt-4 rounded-2xl border border-red-500/30 bg-red-950/30 px-4 py-3 text-sm text-red-200">
+            {error}
+          </div>
+        )}
 
-      {error && (
-        <div className="mt-4 rounded-xl border border-red-500/30 bg-red-950/30 px-4 py-3 text-sm text-red-200">
-          {error}
-        </div>
-      )}
+        <details className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+          <summary className="cursor-pointer list-none text-sm font-semibold text-slate-100">
+            Lihat target demonstrasi dan kebijakan analyzer
+          </summary>
+          <div className="mt-4 space-y-4">
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-sm leading-relaxed text-slate-400">
+              <div className="font-semibold text-slate-100">{emailAuthPolicy.title}</div>
+              <p className="mt-2">{emailAuthPolicy.summary}</p>
+              <p className="mt-2">{emailAuthPolicy.rationale}</p>
+            </div>
+            <PolicyTargetList targets={allowedTargets} />
+          </div>
+        </details>
+      </section>
 
       {policyBlock && (
-        <div className="mt-6 space-y-4">
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-950/20 p-4 sm:p-5">
+        <section className="space-y-4">
+          <div className="rounded-3xl border border-amber-500/30 bg-amber-950/20 p-5 sm:p-6">
             <div className="flex items-start gap-3">
               <Lock className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
               <div>
-                <div className="text-sm font-semibold text-amber-200">Analyzer Dikunci Untuk Domain Ini</div>
+                <div className="text-sm font-semibold text-amber-200">Domain ini perlu ditinjau lebih dulu</div>
                 <p className="mt-2 text-sm leading-relaxed text-amber-100/85">{policyBlock.error}</p>
-                <div className="mt-3 rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-3 text-xs text-slate-300">
-                  <div className="font-semibold text-slate-100">Domain yang Anda masukkan</div>
+                <div className="mt-3 rounded-2xl border border-slate-700 bg-slate-950/60 px-3 py-3 text-xs text-slate-300">
+                  <div className="font-semibold text-slate-100">Domain yang dimasukkan</div>
                   <div className="mt-1 break-all font-mono text-amber-200">{policyBlock.blockedTarget}</div>
                 </div>
               </div>
@@ -310,45 +312,44 @@ Analyzer DNS baru tersedia setelah akses penuh aktif. Selama mode terbatas, Anda
             isSubmitting={isSubmittingRequest}
             error={requestError}
             feedback={requestFeedback}
-            description="Untuk domain di luar daftar demonstrasi aman, analyzer ini memakai review manual. Jika Anda pemilik domain atau memiliki izin tertulis, kirim permintaan ini agar domain dapat ditinjau untuk audit DNS SPF/DMARC yang sah."
+            description="Jika Anda pemilik domain atau memiliki izin tertulis, kirim permintaan ini untuk review manual."
           />
-        </div>
+        </section>
       )}
 
       {isAnalyzing && (
-        <div className="mt-6 flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-4 text-sm text-slate-300">
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900/70 px-4 py-4 text-sm text-slate-300">
           <Loader2 className="h-4 w-4 animate-spin text-cyan-300" />
           Melakukan query TXT DNS secara real-time...
         </div>
       )}
 
       {result && (
-        <div className="mt-6 space-y-6">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
-            <div className="text-sm font-semibold text-slate-100">Metodologi</div>
-            <p className="mt-2 text-sm leading-relaxed text-slate-400">{result.summary}</p>
-            <div className="mt-4 space-y-2">
-              {result.methodology?.map((item, index) => (
-                <div key={`${item}-${index}`} className="rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm text-slate-300">
-                  {item}
-                </div>
-              ))}
-            </div>
-          </div>
-
+        <div className="space-y-6">
           <div className="grid gap-4 lg:grid-cols-2">
             <ResultCard title="SPF Analysis" result={result.spf} />
             <ResultCard title="DMARC Analysis" result={result.dmarc} />
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+          <details className="rounded-3xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5" open>
+            <summary className="cursor-pointer list-none text-sm font-semibold text-slate-100">Ringkasan dan metodologi</summary>
+            <p className="mt-4 text-sm leading-relaxed text-slate-400">{result.summary}</p>
+            <div className="mt-4 space-y-2">
+              {result.methodology?.map((item, index) => (
+                <div key={`${item}-${index}`} className="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm text-slate-300">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </details>
+
+          <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
             <div className="flex items-center gap-2 text-slate-100">
               <FileText className="h-4 w-4 text-cyan-300" />
               <div className="text-sm font-semibold">Bukti Mentah DNS</div>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-slate-400">
-              Record di bawah ini ditampilkan apa adanya dari server DNS publik. Bagian ini sengaja dipertahankan agar pengguna
-              dapat memverifikasi bahwa engine benar-benar membaca TXT record nyata, bukan hasil simulasi.
+              TXT record di bawah ini ditampilkan apa adanya agar hasil analisis bisa diverifikasi manual.
             </p>
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
               <RawDnsPanel
@@ -362,12 +363,9 @@ Analyzer DNS baru tersedia setelah akses penuh aktif. Selama mode terbatas, Anda
                 records={result.rawDnsRecords.dmarcTxtRecords || []}
               />
             </div>
-          </div>
+          </section>
         </div>
       )}
     </div>
   );
 }
-
-
-

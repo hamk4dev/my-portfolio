@@ -5,7 +5,8 @@ export async function verifyTurnstileToken({ token, remoteip }) {
     return {
       ok: false,
       status: 503,
-      error: 'Turnstile belum dikonfigurasi di server.',
+      code: 'turnstile-missing-secret',
+      error: 'Pemeriksaan akses belum tersedia di server.',
       details: ['missing-secret'],
     };
   }
@@ -14,7 +15,8 @@ export async function verifyTurnstileToken({ token, remoteip }) {
     return {
       ok: false,
       status: 400,
-      error: 'Token Turnstile wajib diisi.',
+      code: 'turnstile-missing-token',
+      error: 'Token pemeriksaan akses wajib diisi.',
       details: ['missing-token'],
     };
   }
@@ -27,29 +29,59 @@ export async function verifyTurnstileToken({ token, remoteip }) {
     formData.append('remoteip', remoteip);
   }
 
-  const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    cache: 'no-store',
-    signal: AbortSignal.timeout(10000),
-    body: formData,
-  });
+  let verifyRes;
+
+  try {
+    verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      cache: 'no-store',
+      signal: AbortSignal.timeout(10000),
+      body: formData,
+    });
+  } catch (error) {
+    const timeout = error?.name === 'AbortError' || error?.name === 'TimeoutError';
+
+    return {
+      ok: false,
+      status: timeout ? 504 : 502,
+      code: timeout ? 'turnstile-timeout' : 'turnstile-unreachable',
+      error: timeout
+        ? 'Layanan pemeriksaan akses memerlukan waktu lebih lama dari biasanya.'
+        : 'Gagal menghubungi layanan pemeriksaan akses.',
+      details: [timeout ? 'timeout' : 'unreachable'],
+    };
+  }
 
   if (!verifyRes.ok) {
     return {
       ok: false,
       status: 502,
-      error: 'Gagal menghubungi layanan Turnstile.',
+      code: 'turnstile-unreachable',
+      error: 'Gagal menghubungi layanan pemeriksaan akses.',
       details: ['turnstile-unreachable'],
     };
   }
 
-  const verifyData = await verifyRes.json();
+  let verifyData = null;
+
+  try {
+    verifyData = await verifyRes.json();
+  } catch {
+    return {
+      ok: false,
+      status: 502,
+      code: 'turnstile-invalid-response',
+      error: 'Respons layanan pemeriksaan akses tidak valid.',
+      details: ['invalid-response'],
+    };
+  }
 
   if (!verifyData.success) {
     return {
       ok: false,
       status: 403,
-      error: 'Verifikasi bot gagal.',
+      code: 'turnstile-verification-failed',
+      error: 'Verifikasi akses belum berhasil.',
       details: verifyData['error-codes'] || [],
     };
   }

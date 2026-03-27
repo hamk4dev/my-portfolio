@@ -40,7 +40,10 @@ export async function POST(req) {
 
     if (!rateLimit.allowed) {
       return NextResponse.json(
-        { error: 'Terlalu banyak percobaan verifikasi Turnstile. Coba lagi beberapa menit lagi.' },
+        {
+          error: 'Terlalu banyak percobaan verifikasi Turnstile. Coba lagi beberapa menit lagi.',
+          code: 'turnstile-rate-limited',
+        },
         { status: 429, headers: NO_STORE_HEADERS }
       );
     }
@@ -53,21 +56,30 @@ export async function POST(req) {
 
     if (!verification.ok) {
       return NextResponse.json(
-        { error: verification.error, details: verification.details },
+        {
+          error: verification.error,
+          details: verification.details,
+          code: verification.code || null,
+        },
         { status: verification.status, headers: NO_STORE_HEADERS }
       );
     }
 
     const sessionToken = createTurnstileSessionToken();
     if (!sessionToken) {
+      console.error('Turnstile session token could not be created. Check TURNSTILE_SESSION_SECRET in deployment env.');
+
       return NextResponse.json(
-        { error: 'Sesi Turnstile tidak dapat dibuat.' },
+        {
+          error: 'Sesi akses belum siap.',
+          code: 'turnstile-session-unavailable',
+        },
         { status: 503, headers: NO_STORE_HEADERS }
       );
     }
 
     const response = NextResponse.json(
-      { success: true, message: 'Verifikasi human berhasil.' },
+      { success: true, message: 'Verifikasi akses berhasil.' },
       { headers: NO_STORE_HEADERS }
     );
     response.cookies.set(
@@ -79,10 +91,16 @@ export async function POST(req) {
     return response;
   } catch (error) {
     if (error?.status) {
-      return NextResponse.json({ error: error.message }, { status: error.status, headers: NO_STORE_HEADERS });
+      return NextResponse.json(
+        { error: error.message, code: error.code || null },
+        { status: error.status, headers: NO_STORE_HEADERS }
+      );
     }
 
     console.error('Turnstile route error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500, headers: NO_STORE_HEADERS });
+    return NextResponse.json(
+      { error: 'Internal Server Error', code: 'internal-error' },
+      { status: 500, headers: NO_STORE_HEADERS }
+    );
   }
 }

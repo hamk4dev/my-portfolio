@@ -7,21 +7,17 @@ export const contactInfo = {
   locationName: 'Kastil Theos Kaisar Hamka Yang Agung XVI',
   addressLine: 'Ulu Baula, Baula, Kolaka, Sulawesi Tenggara, Indonesia',
   notes: [
-    'Gunakan form ini untuk kebutuhan kerja sama, diskusi proyek, atau pertanyaan profesional.',
-    'Pesan diverifikasi dengan Turnstile sebelum dikirim ke backend agar lebih aman dari spam bot.',
+    'Email langsung tersedia kapan saja.',
+    'Peta bisa dibuka di tab terpisah atau dimuat di halaman ini.',
   ],
 };
 
-export const contactMarkdown = `# Contact Hub
-
-Hubungi saya melalui saluran berikut:
+export const contactMarkdown = `# Kontak
 
 Email: ${contactInfo.email}
 GitHub: ${contactInfo.githubUrl}
-Peta Lokasi: ${contactInfo.mapUrl}
+Peta: ${contactInfo.mapUrl}
 
 Lokasi:
 - ${contactInfo.locationName}
-- ${contactInfo.addressLine}
-
-Preview file ini menampilkan peta lokasi dan form kirim pesan yang diamankan Turnstile.`;
+- ${contactInfo.addressLine}`;

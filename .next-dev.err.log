@@ -486,3 +486,7 @@ Caused by:
 Import trace for requested module:
 ./src/components/EmailAuthAnalyzer.jsx
 ./src/app/page.jsx
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: EPERM: operation not permitted, rename 'D:\TI\my-portfolio\.next\cache\webpack\client-development\0.pack.gz_' -> 'D:\TI\my-portfolio\.next\cache\webpack\client-development\0.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'D:\TI\my-portfolio\.next\cache\webpack\client-development\1.pack.gz_' -> 'D:\TI\my-portfolio\.next\cache\webpack\client-development\1.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'D:\TI\my-portfolio\.next\cache\webpack\client-development\1.pack.gz_' -> 'D:\TI\my-portfolio\.next\cache\webpack\client-development\1.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'D:\TI\my-portfolio\.next\cache\webpack\client-development\0.pack.gz_' -> 'D:\TI\my-portfolio\.next\cache\webpack\client-development\0.pack.gz'
