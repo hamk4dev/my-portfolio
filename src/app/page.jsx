@@ -1042,19 +1042,21 @@ ATURAN SANGAT KETAT:
                 {isAppNode ? (
                   <div className="space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-slate-700 pb-2 gap-3">
-                      <div className="flex items-center text-emerald-400 text-base sm:text-lg font-medium truncate">
+                      <div className="min-w-0 flex items-center text-emerald-400 text-base sm:text-lg font-medium truncate">
                         <FileText className="w-4 h-4 sm:w-5 sm:h-5 mr-2 shrink-0" />
                         <span className="truncate">{selectedNode.name}</span>
                       </div>
-                      <button 
-                        onClick={() => {
-                          setSelectedNode(null);
-                          setAiSummary(null);
-                        }}
-                        className="text-[10px] sm:text-xs bg-slate-800 hover:bg-slate-700 px-2 sm:px-3 py-1.5 rounded text-slate-300 transition-colors whitespace-nowrap"
-                      >
-                        Tutup Preview
-                      </button>
+                      <div className="flex w-full sm:w-auto justify-end shrink-0">
+                        <button 
+                          onClick={() => {
+                            setSelectedNode(null);
+                            setAiSummary(null);
+                          }}
+                          className="w-full sm:w-auto text-[11px] sm:text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300 transition-colors whitespace-nowrap"
+                        >
+                          Tutup Preview
+                        </button>
+                      </div>
                     </div>
 
                     {isContactApp ? (
