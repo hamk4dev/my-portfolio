@@ -75,7 +75,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
           <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 p-3 text-emerald-300">
             <Mail className="h-5 w-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h3 className="text-lg font-semibold text-slate-100">Kontak</h3>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
               Pilih jalur kontak yang paling sesuai untuk Anda.
@@ -86,28 +86,32 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <a
             href={`mailto:${contactInfo.email}`}
-            className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 transition hover:border-emerald-500/30 hover:bg-slate-900"
+            className="min-w-0 rounded-2xl border border-slate-800 bg-slate-900/70 p-4 transition hover:border-emerald-500/30 hover:bg-slate-900"
           >
             <div className="flex items-center gap-3 text-emerald-300">
               <Mail className="h-4 w-4" />
               <span className="text-xs font-semibold uppercase tracking-[0.18em]">Email</span>
             </div>
             <div className="mt-4 text-base font-semibold text-slate-100">Email-ku</div>
-            <div className="mt-2 text-sm text-slate-400">Klik untuk membuka email.</div>
+            <div className="mt-2 break-words text-sm leading-relaxed text-slate-400">
+              Buka jalur email langsung untuk percakapan profesional.
+            </div>
           </a>
 
           <a
             href={contactInfo.githubUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 transition hover:border-blue-500/30 hover:bg-slate-900"
+            className="min-w-0 rounded-2xl border border-slate-800 bg-slate-900/70 p-4 transition hover:border-blue-500/30 hover:bg-slate-900"
           >
             <div className="flex items-center gap-3 text-blue-300">
               <Github className="h-4 w-4" />
               <span className="text-xs font-semibold uppercase tracking-[0.18em]">GitHub</span>
             </div>
             <div className="mt-4 text-base font-semibold text-slate-100">hamk4dev</div>
-            <div className="mt-2 text-sm text-slate-400">Lihat repo dan karya yang tersedia.</div>
+            <div className="mt-2 break-words text-sm leading-relaxed text-slate-400">
+              Lihat repo, eksperimen, dan proyek yang sudah dipublikasikan.
+            </div>
           </a>
         </div>
       </section>
@@ -117,7 +121,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
           <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 p-3 text-emerald-300">
             <MapPin className="h-5 w-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h3 className="text-lg font-semibold text-slate-100">Lokasi</h3>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
               Alamat dan peta tersedia di bawah ini.
@@ -125,11 +129,15 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
           </div>
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)]">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
+        <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+          <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Alamat</div>
-            <div className="mt-3 text-base font-semibold text-slate-100">{contactInfo.locationName}</div>
-            <div className="mt-2 text-sm leading-relaxed text-slate-400">{contactInfo.addressLine}</div>
+            <div className="mt-3 break-words text-base font-semibold leading-relaxed text-slate-100">
+              {contactInfo.locationName}
+            </div>
+            <div className="mt-2 break-words text-sm leading-relaxed text-slate-400">
+              {contactInfo.addressLine}
+            </div>
 
             <a
               href={contactInfo.mapUrl}
@@ -142,7 +150,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
             </a>
           </div>
 
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
+          <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Peta</div>
             <div className="mt-4 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/80">
               {showInlineMap ? (
@@ -151,11 +159,11 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
                   src={contactInfo.mapEmbedUrl}
                   loading="lazy"
                   referrerPolicy="strict-origin-when-cross-origin"
-                  className="h-[320px] w-full border-0 sm:h-[380px]"
+                  className="h-[280px] w-full border-0 sm:h-[340px] xl:h-[360px]"
                 />
               ) : (
-                <div className="flex h-[320px] w-full flex-col justify-between bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_55%),linear-gradient(180deg,_rgba(15,23,42,0.96),_rgba(2,6,23,1))] p-5 sm:h-[380px] sm:p-6">
-                  <div>
+                <div className="flex h-[280px] w-full flex-col justify-between bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_55%),linear-gradient(180deg,_rgba(15,23,42,0.96),_rgba(2,6,23,1))] p-5 sm:h-[340px] sm:p-6 xl:h-[360px]">
+                  <div className="min-w-0">
                     <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
                       Peta
                     </div>
@@ -190,7 +198,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
           <div className="rounded-full border border-indigo-500/30 bg-indigo-500/10 p-3 text-indigo-300">
             <MessageSquare className="h-5 w-5" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h3 className="text-lg font-semibold text-slate-100">Kirim Pesan</h3>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
               Sampaikan pesan singkat melalui form di bawah ini.
@@ -281,7 +289,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
           )}
 
           <div className="flex flex-col gap-3 border-t border-slate-800 pt-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-xs leading-relaxed text-slate-500">
+            <div className="max-w-md text-xs leading-relaxed text-slate-500">
               Jika form belum tersedia, hubungi saya melalui email.
             </div>
             <button

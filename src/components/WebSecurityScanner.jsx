@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import {
+  ChevronDown,
+  ChevronUp,
   Globe,
   Loader2,
   Lock,
@@ -75,19 +77,19 @@ function AllowedTargetList({ targets, onPick }) {
           key={target.hostname}
           type="button"
           onClick={() => onPick(`https://${target.hostname}`)}
-          className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4 text-left transition hover:border-emerald-500/30 hover:bg-slate-950"
+          className="min-w-0 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 text-left transition hover:border-emerald-500/30 hover:bg-slate-950"
         >
           <div className="flex items-start justify-between gap-3">
-            <div>
+            <div className="min-w-0">
               <div className="font-semibold text-slate-100">{target.label}</div>
               <div className="mt-1 break-all font-mono text-xs text-emerald-300">{target.hostname}</div>
             </div>
-            <div className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
+            <div className="shrink-0 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
               Legal Lab
             </div>
           </div>
           <div className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">{target.provider}</div>
-          <p className="mt-2 text-sm leading-relaxed text-slate-400">{target.notes}</p>
+          <p className="mt-2 break-words text-sm leading-relaxed text-slate-400">{target.notes}</p>
         </button>
       ))}
     </div>
@@ -104,6 +106,8 @@ export default function WebSecurityScanner({ siteAccessMode = 'blocked' }) {
   const [requestError, setRequestError] = useState('');
   const [requestFeedback, setRequestFeedback] = useState('');
   const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
+  const [showScannerMethodology, setShowScannerMethodology] = useState(false);
+  const [showLegalTargets, setShowLegalTargets] = useState(false);
 
   const siteAccessVerified = siteAccessMode === 'verified';
 
@@ -205,7 +209,7 @@ export default function WebSecurityScanner({ siteAccessMode = 'blocked' }) {
     <div className="space-y-6">
       <section className="rounded-3xl border border-slate-800 bg-slate-950 p-5 shadow-inner sm:p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2 text-emerald-300">
               <Globe className="h-5 w-5" />
               <span className="text-sm font-semibold uppercase tracking-[0.2em]">Web Security Scanner</span>
@@ -215,7 +219,7 @@ export default function WebSecurityScanner({ siteAccessMode = 'blocked' }) {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-amber-500/20 bg-amber-950/20 px-4 py-3 text-sm text-amber-100/85 lg:max-w-sm">
+          <div className="rounded-2xl border border-amber-500/20 bg-amber-950/20 px-4 py-3 text-sm leading-relaxed text-amber-100/85 lg:max-w-sm">
             Tool ini hanya aktif otomatis untuk legal lab yang sudah dikurasi. Target lain akan diarahkan ke form pesan untuk akses pengujian penuh.
           </div>
         </div>
@@ -257,19 +261,38 @@ export default function WebSecurityScanner({ siteAccessMode = 'blocked' }) {
           </div>
         )}
 
-        <details className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/60 p-4" open>
-          <summary className="cursor-pointer list-none text-sm font-semibold text-slate-100">
-            Target legal dan metodologi
-          </summary>
-          <div className="mt-4 space-y-4">
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-sm leading-relaxed text-slate-400">
-              <div className="font-semibold text-slate-100">{scannerPolicy.title}</div>
-              <p className="mt-2">{scannerPolicy.summary}</p>
-              <p className="mt-2">{scannerPolicy.rationale}</p>
-            </div>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => setShowLegalTargets((value) => !value)}
+            className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-emerald-500/30 hover:text-emerald-300"
+          >
+            {showLegalTargets ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            {showLegalTargets ? 'Sembunyikan Target Legal' : 'Lihat Target Legal'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowScannerMethodology((value) => !value)}
+            className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-emerald-500/30 hover:text-emerald-300"
+          >
+            {showScannerMethodology ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            {showScannerMethodology ? 'Sembunyikan Metodologi' : 'Lihat Metodologi'}
+          </button>
+        </div>
+
+        {showScannerMethodology && (
+          <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-sm leading-relaxed text-slate-400">
+            <div className="font-semibold text-slate-100">{scannerPolicy.title}</div>
+            <p className="mt-2">{scannerPolicy.summary}</p>
+            <p className="mt-2">{scannerPolicy.rationale}</p>
+          </div>
+        )}
+
+        {showLegalTargets && (
+          <div className="mt-4">
             <AllowedTargetList targets={scannerAllowedTargets} onPick={setTargetUrl} />
           </div>
-        </details>
+        )}
       </section>
 
       {policyBlock && (
@@ -311,7 +334,7 @@ export default function WebSecurityScanner({ siteAccessMode = 'blocked' }) {
         <div className="space-y-6">
           <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
             <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1.9fr)]">
-              <div className={`rounded-3xl border p-5 ${scoreTone}`}>
+              <div className={`min-w-0 rounded-3xl border p-5 ${scoreTone}`}>
                 <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Skor Keseluruhan</div>
                 <div className="mt-3 text-5xl font-bold">{result.score}</div>
                 <div className="mt-3 inline-flex rounded-full border px-3 py-1 text-sm font-semibold">
@@ -328,10 +351,10 @@ export default function WebSecurityScanner({ siteAccessMode = 'blocked' }) {
             </div>
 
             <div className="mt-4 grid gap-3 lg:grid-cols-4">
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 lg:col-span-2">
-                <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Final URL</div>
-                <div className="mt-2 break-all text-sm font-medium text-slate-100">{result.analysisContext?.finalUrl || '-'}</div>
-              </div>
+                <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 lg:col-span-2">
+                  <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Final URL</div>
+                  <div className="mt-2 break-all text-sm font-medium text-slate-100">{result.analysisContext?.finalUrl || '-'}</div>
+                </div>
               <div className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3">
                 <div className="text-xs uppercase tracking-[0.18em] text-slate-500">HTTP Status</div>
                 <div className="mt-2 text-sm font-semibold text-slate-100">{result.analysisContext?.httpStatus ?? '-'}</div>
@@ -343,7 +366,7 @@ export default function WebSecurityScanner({ siteAccessMode = 'blocked' }) {
             </div>
 
             <div className="mt-3 grid gap-3 lg:grid-cols-3">
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3">
+              <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3">
                 <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Content-Type</div>
                 <div className="mt-2 break-all text-sm font-medium text-slate-100">{result.analysisContext?.contentType || '-'}</div>
               </div>
@@ -364,12 +387,12 @@ export default function WebSecurityScanner({ siteAccessMode = 'blocked' }) {
             </div>
           )}
 
-          <details className="rounded-3xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5" open>
+          <details className="rounded-3xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
             <summary className="cursor-pointer list-none text-sm font-semibold text-slate-100">Ringkasan dan metodologi</summary>
             <p className="mt-4 text-sm leading-relaxed text-slate-400">{result.summary}</p>
             <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
               {result.methodology?.map((item, index) => (
-                <div key={`${item}-${index}`} className="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-3 text-sm text-slate-300">
+                <div key={`${item}-${index}`} className="min-w-0 rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-3 text-sm leading-relaxed text-slate-300">
                   {item}
                 </div>
               ))}

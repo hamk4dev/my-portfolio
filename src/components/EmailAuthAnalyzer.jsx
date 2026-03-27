@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import {
   BadgeCheck,
+  ChevronDown,
+  ChevronUp,
   Database,
   FileText,
   Loader2,
@@ -41,12 +43,12 @@ function SampleDomainList({ targets, onPick }) {
           key={target.hostname}
           type="button"
           onClick={() => onPick(target.hostname)}
-          className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4 text-left transition hover:border-cyan-500/30 hover:bg-slate-950"
+          className="min-w-0 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 text-left transition hover:border-cyan-500/30 hover:bg-slate-950"
         >
           <div className="font-semibold text-slate-100">{target.label}</div>
           <div className="mt-1 break-all font-mono text-xs text-cyan-300">{target.hostname}</div>
           <div className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">{target.provider}</div>
-          <p className="mt-2 text-sm leading-relaxed text-slate-400">{target.notes}</p>
+          <p className="mt-2 break-words text-sm leading-relaxed text-slate-400">{target.notes}</p>
         </button>
       ))}
     </div>
@@ -58,13 +60,13 @@ function ResultCard({ title, result }) {
   const ResultIcon = style.Icon;
 
   return (
-    <div className={`rounded-3xl border p-5 ${style.card}`}>
+    <div className={`min-w-0 rounded-3xl border p-5 ${style.card}`}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-start gap-3">
+        <div className="min-w-0 flex items-start gap-3">
           <ResultIcon className="mt-0.5 h-5 w-5 shrink-0" />
-          <div>
+          <div className="min-w-0">
             <div className="text-xs uppercase tracking-[0.2em] text-slate-400">{title}</div>
-            <div className="mt-2 text-xl font-semibold text-slate-100">{result.verdict}</div>
+            <div className="mt-2 break-words text-xl font-semibold leading-snug text-slate-100">{result.verdict}</div>
           </div>
         </div>
         <div className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${style.badge}`}>
@@ -129,6 +131,8 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showMethodology, setShowMethodology] = useState(false);
+  const [showSampleDomains, setShowSampleDomains] = useState(false);
 
   const siteAccessVerified = siteAccessMode === 'verified';
 
@@ -170,7 +174,7 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
     <div className="space-y-6">
       <section className="rounded-3xl border border-slate-800 bg-slate-950 p-5 shadow-inner sm:p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2 text-cyan-300">
               <Mail className="h-5 w-5" />
               <span className="text-sm font-semibold uppercase tracking-[0.2em]">Email Auth Analyzer</span>
@@ -180,7 +184,7 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/20 bg-cyan-950/20 px-4 py-3 text-sm text-cyan-100/85 lg:max-w-sm">
+          <div className="rounded-2xl border border-cyan-500/20 bg-cyan-950/20 px-4 py-3 text-sm leading-relaxed text-cyan-100/85 lg:max-w-sm">
             Analyzer ini membaca DNS publik saja. Tidak ada crawl web, tidak ada simulasi email, dan tidak ada exploit aktif.
           </div>
         </div>
@@ -222,19 +226,38 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
           </div>
         )}
 
-        <details className="mt-5 rounded-2xl border border-slate-800 bg-slate-900/60 p-4" open>
-          <summary className="cursor-pointer list-none text-sm font-semibold text-slate-100">
-            Metodologi dan contoh domain
-          </summary>
-          <div className="mt-4 space-y-4">
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-sm leading-relaxed text-slate-400">
-              <div className="font-semibold text-slate-100">{emailAuthPolicy.title}</div>
-              <p className="mt-2">{emailAuthPolicy.summary}</p>
-              <p className="mt-2">{emailAuthPolicy.rationale}</p>
-            </div>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => setShowSampleDomains((value) => !value)}
+            className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-cyan-500/30 hover:text-cyan-300"
+          >
+            {showSampleDomains ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            {showSampleDomains ? 'Sembunyikan Contoh Domain' : 'Lihat Contoh Domain'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowMethodology((value) => !value)}
+            className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-cyan-500/30 hover:text-cyan-300"
+          >
+            {showMethodology ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            {showMethodology ? 'Sembunyikan Metodologi' : 'Lihat Metodologi'}
+          </button>
+        </div>
+
+        {showMethodology && (
+          <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-sm leading-relaxed text-slate-400">
+            <div className="font-semibold text-slate-100">{emailAuthPolicy.title}</div>
+            <p className="mt-2">{emailAuthPolicy.summary}</p>
+            <p className="mt-2">{emailAuthPolicy.rationale}</p>
+          </div>
+        )}
+
+        {showSampleDomains && (
+          <div className="mt-4">
             <SampleDomainList targets={emailAuthSuggestedTargets} onPick={setDomain} />
           </div>
-        </details>
+        )}
       </section>
 
       {isAnalyzing && (
@@ -250,33 +273,33 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <div className="text-xs uppercase tracking-[0.2em] text-slate-500">Target</div>
-                <div className="mt-2 break-all text-2xl font-semibold text-slate-100">{result.domain}</div>
+                <div className="mt-2 break-all text-2xl font-semibold leading-snug text-slate-100">{result.domain}</div>
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:min-w-[320px]">
-                <div className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3">
+                <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3">
                   <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Resolver SPF</div>
-                  <div className="mt-2 text-sm font-semibold text-cyan-200">{result.resolvers?.spf || 'system'}</div>
+                  <div className="mt-2 break-all text-sm font-semibold text-cyan-200">{result.resolvers?.spf || 'system'}</div>
                 </div>
-                <div className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3">
+                <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3">
                   <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Resolver DMARC</div>
-                  <div className="mt-2 text-sm font-semibold text-cyan-200">{result.resolvers?.dmarc || 'system'}</div>
+                  <div className="mt-2 break-all text-sm font-semibold text-cyan-200">{result.resolvers?.dmarc || 'system'}</div>
                 </div>
               </div>
             </div>
 
             <div className="mt-4 grid gap-3 lg:grid-cols-3">
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3">
+              <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3">
                 <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Ringkasan</div>
                 <div className="mt-2 text-sm leading-relaxed text-slate-300">{result.summary}</div>
               </div>
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 lg:col-span-2">
+              <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 lg:col-span-2">
                 <div className="flex items-center gap-2 text-slate-100">
                   <BadgeCheck className="h-4 w-4 text-cyan-300" />
                   <div className="text-sm font-semibold">Metodologi</div>
                 </div>
                 <div className="mt-3 grid gap-2 sm:grid-cols-3">
                   {result.methodology?.map((item, index) => (
-                    <div key={`${item}-${index}`} className="rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-3 text-sm text-slate-300">
+                    <div key={`${item}-${index}`} className="min-w-0 rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-3 text-sm leading-relaxed text-slate-300">
                       {item}
                     </div>
                   ))}

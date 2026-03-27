@@ -216,6 +216,7 @@ export default function PortfolioOS() {
   };
 
   const getPortfolioAiContext = () => getVfsContext(vfs).slice(0, 7000);
+  const getTerminalAiContext = () => getVfsContext(vfs).slice(0, 4200);
   const isAiAvailable = systemHealth?.services?.ai;
   const hasProtectedAccess = siteAccessMode === 'verified';
 
@@ -658,8 +659,8 @@ ATURAN SANGAT KETAT:
           }
           const prompt = args.slice(1).join(' ');
           
-          if (prompt.length > 200) {
-             print(getTerminalToolError('ai', 'Pesan terlalu panjang. Maksimal 200 karakter.'), 'error');
+          if (prompt.length > 320) {
+             print(getTerminalToolError('ai', 'Pesan terlalu panjang. Maksimal 320 karakter.'), 'error');
              break;
           }
 
@@ -671,22 +672,21 @@ ATURAN SANGAT KETAT:
           setIsGenerating(true);
           setActiveTask('AI sedang memproses...');
           
-          const portfolioData = getPortfolioAiContext();
+          const portfolioData = getTerminalAiContext();
           const strictSystemPrompt = `
 Kamu adalah AI Copilot khusus untuk "Init.CV".
 Tugas utamamu HANYA menjawab pertanyaan seputar pemilik portfolio ini.
 
 ATURAN SANGAT KETAT:
-1. Basis Pengetahuan: Kamu HANYA boleh menggunakan informasi dari "DATA PORTFOLIO" di bawah ini.
+1. Basis Pengetahuan: Kamu HANYA boleh menggunakan informasi dari "DATA PORTFOLIO" yang diberikan pada prompt pengguna.
 2. Pembatasan Scope: JANGAN PERNAH menjawab pertanyaan umum.
 3. Format Jawaban: Jawab langsung ke intinya, profesional, singkat, bahasa Indonesia.
 4. DILARANG menggunakan simbol markdown tebal/bintang.
-
-DATA PORTFOLIO:
-${portfolioData}
 `;
 
-          callGemini(prompt, strictSystemPrompt)
+          const aiPrompt = `DATA PORTFOLIO:\n${portfolioData}\n\nPERTANYAAN PENGGUNA:\n${prompt}`;
+
+          callGemini(aiPrompt, strictSystemPrompt)
             .then(res => {
               recordAiUsage();
               setHistory(prev => [...prev, { id: Date.now(), type: 'ai_output', text: res }]);
