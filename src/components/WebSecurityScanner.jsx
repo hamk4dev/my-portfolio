@@ -291,7 +291,20 @@ export default function WebSecurityScanner({ siteAccessMode = 'blocked' }) {
         )}
 
         {showLegalTargets && (
-          <div className="mt-4">
+          <div className="mt-4 space-y-4">
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm leading-relaxed text-slate-400">
+              Daftar website demo yang saat ini diizinkan untuk pengujian langsung:
+              <div className="mt-3 flex flex-wrap gap-2">
+                {scannerAllowedTargets.map((target) => (
+                  <span
+                    key={`allowed-${target.hostname}`}
+                    className="rounded-full border border-slate-700 bg-slate-950/70 px-3 py-1 font-mono text-[10px] text-emerald-300"
+                  >
+                    {target.hostname}
+                  </span>
+                ))}
+              </div>
+            </div>
             <AllowedTargetList targets={scannerAllowedTargets} onPick={setTargetUrl} />
           </div>
         )}
@@ -342,7 +355,10 @@ export default function WebSecurityScanner({ siteAccessMode = 'blocked' }) {
                 <div className="mt-3 inline-flex rounded-full border px-3 py-1 text-sm font-semibold">
                   Grade {result.grade}
                 </div>
-                <div className="mt-4 break-all text-sm text-slate-400">Target: {result.target}</div>
+                <div className="mt-5">
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Target</div>
+                  <div className="mt-2 break-all text-xs leading-6 text-slate-300">{result.target}</div>
+                </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-3">

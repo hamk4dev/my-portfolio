@@ -402,6 +402,9 @@ export async function POST(req) {
       );
     }
 
+    const allowedTargets = getScannerAllowedTargets();
+    const targetProfile = allowedTargets.find((target) => target.hostname === targetUrl.hostname);
+
     const dnsCategory = createCategory('dns', 'DNS & Target Validation', 10);
     const transportCategory = createCategory('transport', 'Transport & Redirect', 25);
     const headersCategory = createCategory('headers', 'Browser Security Headers', 25);
@@ -415,6 +418,16 @@ export async function POST(req) {
       name: 'Public DNS Resolution',
       desc: `Domain mengarah ke alamat publik: ${resolvedAddresses.join(', ')}`,
     });
+
+    if (targetProfile?.contextNote) {
+      addCheck(dnsCategory, {
+        status: 'WARN',
+        severity: 'MEDIUM',
+        name: 'Known Demo Lab Context',
+        desc: targetProfile.contextNote,
+        penalty: 2,
+      });
+    }
 
     let finalTarget = targetUrl;
     let headers = {};
@@ -514,6 +527,18 @@ export async function POST(req) {
           desc: 'Snapshot HTML belum tersedia sehingga analisis konten dilewati.',
         });
       }
+    }
+
+    if (targetProfile?.baselinePenalty) {
+      addCheck(exposureCategory, {
+        status: 'WARN',
+        severity: 'MEDIUM',
+        name: 'Training Lab Risk Baseline',
+        desc:
+          targetProfile.contextNote ||
+          'Target ini adalah lab uji yang memang disiapkan untuk demonstrasi keamanan, sehingga grade baseline diturunkan agar mencerminkan konteks sebenarnya.',
+        penalty: targetProfile.baselinePenalty,
+      });
     }
 
     const categories = [

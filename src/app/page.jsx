@@ -6,6 +6,7 @@ import ContactHub from '@/components/ContactHub';
 import EmailAuthAnalyzer from '@/components/EmailAuthAnalyzer';
 import GlobalTurnstileGate from '@/components/GlobalTurnstileGate';
 import WebSecurityScanner from '@/components/WebSecurityScanner';
+import { scannerAllowedTargets } from '@/data/scanner-policy';
 import { initialVFS } from '@/data/vfs';
 import { getNodeAtPath, resolvePath, renderDocumentContent } from '@/lib/utils';
 import {
@@ -37,6 +38,7 @@ export default function PortfolioOS() {
   const [systemHealth, setSystemHealth] = useState(null);
   const [siteAccessMode, setSiteAccessMode] = useState('verifying');
   const [turnstileReopenSignal, setTurnstileReopenSignal] = useState(0);
+  const [viewportState, setViewportState] = useState({ width: 0, isTouch: false });
 
   const [history, setHistory] = useState([
     { id: 0, type: 'system', text: 'Init.CV v1.0.0 initialized.' },
@@ -87,6 +89,27 @@ export default function PortfolioOS() {
     setTime(new Date());
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const syncViewportState = () => {
+      const width = typeof window !== 'undefined' ? window.innerWidth : 0;
+      const isTouch =
+        typeof window !== 'undefined' &&
+        (
+          window.matchMedia?.('(pointer: coarse)')?.matches ||
+          navigator.maxTouchPoints > 0
+        );
+
+      setViewportState({ width, isTouch: Boolean(isTouch) });
+    };
+
+    syncViewportState();
+    window.addEventListener('resize', syncViewportState);
+
+    return () => {
+      window.removeEventListener('resize', syncViewportState);
+    };
   }, []);
 
   useEffect(() => {
@@ -236,10 +259,12 @@ export default function PortfolioOS() {
   const getTerminalToolError = (tool, message) => `${tool} error: ${message}`;
 
   const getTerminalSystemErrorMessage = () => 'Permintaan belum dapat diproses saat ini. Coba lagi sebentar lagi.';
+  const getAllowedWebscanTargetsMessage = () =>
+    scannerAllowedTargets.map((target) => `- ${target.hostname}`).join('\n');
 
   const getWebscanErrorMessage = (error) => {
     if (error?.code === 'DOMAIN_NOT_ALLOWED') {
-      return 'Target ini perlu ditinjau lebih dulu. Gunakan panel scanner untuk melihat detail dan mengirim permintaan izin.';
+      return `Website ini dibatasi dan tidak diizinkan untuk scanning langsung.\n\nDaftar website demo yang diizinkan:\n${getAllowedWebscanTargetsMessage()}`;
     }
 
     if (error?.status === 429) {
@@ -476,7 +501,7 @@ ATURAN SANGAT KETAT:
         }
 
         case 'whoami': {
-          print('Mengumpulkan informasi sistem lokal...', 'system');
+          print('Sedang memproses...', 'system');
           if (!hasProtectedAccess) {
             print(getTerminalToolError('whoami', getAccessLockedMessage('Fitur ini')), 'error');
             break;
@@ -557,7 +582,7 @@ ATURAN SANGAT KETAT:
           }
 
           setIsGenerating(true);
-          setActiveTask('Backend Processing...');
+          setActiveTask('Sedang memproses...');
 
           runBackendWebScan(target).then(res => {
              let output = [`\n[ TARGET: ${res.target} ]\n`];
@@ -599,7 +624,7 @@ ATURAN SANGAT KETAT:
           }
 
           setIsGenerating(true);
-          setActiveTask('DNS Analysis...');
+          setActiveTask('Sedang memproses...');
 
           runEmailAuthAnalysis(args[1]).then(res => {
              let output = [`\n[ TARGET: ${res.domain} ]\n`];
@@ -808,6 +833,12 @@ ATURAN SANGAT KETAT:
   const isEmailAuthApp = selectedNode?.app === 'email-auth-analyzer';
   const isScannerApp = selectedNode?.app === 'web-security-scanner';
   const isAppNode = isContactApp || isEmailAuthApp || isScannerApp;
+  const useFocusedToolLayout =
+    isAppNode &&
+    (
+      viewportState.isTouch ||
+      (viewportState.width > 0 && viewportState.width < 1280)
+    );
 
   return (
     <div className="flex flex-col h-[100dvh] bg-slate-950 text-slate-300 font-sans overflow-hidden">
@@ -868,8 +899,11 @@ ATURAN SANGAT KETAT:
 
       <main 
         ref={mainContainerRef}
-        className="flex flex-1 flex-col md:flex-row overflow-hidden min-h-0 relative"
+        className={`flex flex-1 overflow-hidden min-h-0 relative ${
+          useFocusedToolLayout ? 'flex-col' : 'flex-col md:flex-row'
+        }`}
       >
+        {!useFocusedToolLayout && (
         <section 
           style={{ flexGrow: splitRatio, flexBasis: 0 }}
           className="flex flex-col bg-black overflow-hidden font-mono min-w-0 min-h-0"
@@ -927,25 +961,28 @@ ATURAN SANGAT KETAT:
             <div ref={endOfTerminalRef} className="h-4 shrink-0"></div>
           </div>
         </section>
+        )}
 
-        <div
-          className={`flex items-center justify-center bg-slate-800 transition-colors z-20 shrink-0
-            ${isDragging ? 'bg-indigo-500' : 'hover:bg-slate-600'}
-            md:w-1 md:h-full md:cursor-col-resize
-            w-full h-1 cursor-row-resize
-          `}
-          onMouseDown={() => setIsDragging(true)}
-          onTouchStart={() => setIsDragging(true)}
-        >
-          <div className="flex md:flex-col gap-0.5 opacity-50 pointer-events-none">
-            <div className="w-0.5 h-0.5 bg-slate-400 rounded-full"></div>
-            <div className="w-0.5 h-0.5 bg-slate-400 rounded-full"></div>
-            <div className="w-0.5 h-0.5 bg-slate-400 rounded-full"></div>
+        {!useFocusedToolLayout && (
+          <div
+            className={`flex items-center justify-center bg-slate-800 transition-colors z-20 shrink-0
+              ${isDragging ? 'bg-indigo-500' : 'hover:bg-slate-600'}
+              md:w-1 md:h-full md:cursor-col-resize
+              w-full h-1 cursor-row-resize
+            `}
+            onMouseDown={() => setIsDragging(true)}
+            onTouchStart={() => setIsDragging(true)}
+          >
+            <div className="flex md:flex-col gap-0.5 opacity-50 pointer-events-none">
+              <div className="w-0.5 h-0.5 bg-slate-400 rounded-full"></div>
+              <div className="w-0.5 h-0.5 bg-slate-400 rounded-full"></div>
+              <div className="w-0.5 h-0.5 bg-slate-400 rounded-full"></div>
+            </div>
           </div>
-        </div>
+        )}
 
         <section 
-          style={{ flexGrow: 100 - splitRatio, flexBasis: 0 }}
+          style={useFocusedToolLayout ? undefined : { flexGrow: 100 - splitRatio, flexBasis: 0 }}
           className="flex flex-col bg-slate-900 overflow-hidden min-w-0 min-h-0"
         >
           <div className="flex items-center justify-between px-4 py-2 bg-slate-800/50 border-b border-slate-800 text-sm shrink-0">
@@ -1151,7 +1188,7 @@ ATURAN SANGAT KETAT:
           </div>
         </section>
 
-        {isDragging && (
+        {isDragging && !useFocusedToolLayout && (
           <div
             className="fixed inset-0 z-50 cursor-row-resize md:cursor-col-resize"
             onMouseMove={handleMouseMove}
