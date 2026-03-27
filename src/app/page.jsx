@@ -833,15 +833,14 @@ ATURAN SANGAT KETAT:
   const isEmailAuthApp = selectedNode?.app === 'email-auth-analyzer';
   const isScannerApp = selectedNode?.app === 'web-security-scanner';
   const isAppNode = isContactApp || isEmailAuthApp || isScannerApp;
-  const useFocusedToolLayout =
-    isAppNode &&
-    (
-      viewportState.isTouch ||
-      (viewportState.width > 0 && viewportState.width < 1280)
-    );
+  const isSmartphoneViewport =
+    viewportState.isTouch &&
+    viewportState.width > 0 &&
+    viewportState.width < 768;
+  const useFocusedToolLayout = Boolean(selectedNode) && isSmartphoneViewport;
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-slate-950 text-slate-300 font-sans overflow-hidden">
+    <div className="flex flex-col h-[100svh] md:h-[100dvh] bg-slate-950 text-slate-300 font-sans overflow-hidden">
       <GlobalTurnstileGate
         onVerified={refreshSystemHealth}
         onAccessStateChange={setSiteAccessMode}
