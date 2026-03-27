@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Folder, FileText, Terminal, Monitor, ChevronRight, CornerDownLeft, Home, Search, List, ArrowLeft, Cpu, Layout, Rocket, Loader2, ShieldCheck } from 'lucide-react';
+import { Folder, FileText, Terminal, Monitor, ChevronRight, CornerDownLeft, Home, Search, List, ArrowLeft, Cpu, Layout, Rocket, Loader2, ShieldCheck, BookOpen } from 'lucide-react';
 import ContactHub from '@/components/ContactHub';
 import EmailAuthAnalyzer from '@/components/EmailAuthAnalyzer';
 import GlobalTurnstileGate from '@/components/GlobalTurnstileGate';
@@ -842,12 +842,18 @@ ATURAN SANGAT KETAT:
   };
 
   const currentDirNode = getNodeAtPath(vfs, currentPath);
+  const currentDirEntries =
+    currentDirNode?.type === 'dir'
+      ? Object.entries(currentDirNode.children).filter(([name]) => !name.startsWith('.'))
+      : [];
+  const currentDirectoryName = currentPath.length === 0 ? 'root' : currentPath[currentPath.length - 1];
   const pathDisplay = currentPath.length === 0 ? '~' : `~/${currentPath.join('/')}`;
   const selectedNodeCacheKey = selectedNode?.path ?? selectedNode?.name ?? '';
   const isContactApp = selectedNode?.app === 'contact-hub';
   const isEmailAuthApp = selectedNode?.app === 'email-auth-analyzer';
   const isScannerApp = selectedNode?.app === 'web-security-scanner';
   const isAppNode = isContactApp || isEmailAuthApp || isScannerApp;
+  const isBooksDirectory = currentDirectoryName === 'books';
   const isSmartphoneViewport =
     viewportState.isTouch &&
     viewportState.width > 0 &&
@@ -1044,7 +1050,7 @@ ATURAN SANGAT KETAT:
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-slate-700 pb-2 gap-3">
                       <div className="min-w-0 flex items-center text-emerald-400 text-base sm:text-lg font-medium truncate">
                         <FileText className="w-4 h-4 sm:w-5 sm:h-5 mr-2 shrink-0" />
-                        <span className="truncate">{selectedNode.name}</span>
+                        <span className="truncate">{selectedNode.title ?? selectedNode.name}</span>
                       </div>
                       <div className="flex w-full sm:w-auto justify-end shrink-0">
                         <button 
@@ -1072,7 +1078,7 @@ ATURAN SANGAT KETAT:
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-slate-700 pb-2 gap-3">
                       <div className="flex items-center text-emerald-400 text-base sm:text-lg font-medium truncate">
                         <FileText className="w-4 h-4 sm:w-5 sm:h-5 mr-2 shrink-0" />
-                        <span className="truncate">{selectedNode.name}</span>
+                        <span className="truncate">{selectedNode.title ?? selectedNode.name}</span>
                       </div>
                       <div className="flex items-center space-x-2 shrink-0">
                         <button 
@@ -1158,51 +1164,120 @@ ATURAN SANGAT KETAT:
               <div className="pb-8">
                 <h2 className="text-lg sm:text-xl font-semibold text-slate-100 mb-4 sm:mb-6 flex items-center">
                   <Folder className="w-5 h-5 sm:w-6 sm:h-6 mr-2 text-blue-400 shrink-0" />
-                  <span className="truncate">Isi Direktori: {currentPath.length === 0 ? 'root' : currentPath[currentPath.length - 1]}</span>
+                  <span className="truncate">Isi Direktori: {currentDirectoryName}</span>
                 </h2>
-                
-                <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-                  {currentPath.length > 0 && (
-                     <button
-                        onClick={() => handleGuiAction('back')}
+
+                {isBooksDirectory ? (
+                  <div className="space-y-5">
+                    <div className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/50 px-4 py-4 sm:px-5">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="space-y-1">
+                          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Reading Shelf</p>
+                          <h3 className="text-base sm:text-lg font-semibold text-slate-100">Rak bacaan online untuk pendalaman AI, security, dan engineering.</h3>
+                        </div>
+                        {currentPath.length > 0 && (
+                          <button
+                            onClick={() => handleGuiAction('back')}
+                            className="inline-flex items-center justify-center rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-xs sm:text-sm font-medium text-slate-300 transition-colors hover:border-slate-600 hover:text-white"
+                          >
+                            <CornerDownLeft className="mr-2 h-4 w-4" />
+                            Kembali
+                          </button>
+                        )}
+                      </div>
+                      <p className="max-w-3xl text-sm leading-relaxed text-slate-400">
+                        Setiap kartu membuka catatan bacaan dengan ringkasan singkat dan tautan resmi untuk membaca sumbernya secara online.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                      {currentDirEntries.map(([name, node]) => (
+                        <button
+                          key={name}
+                          onClick={() => handleGuiAction(node.type === 'dir' ? 'cd' : 'open', name)}
+                          className="group flex h-full flex-col rounded-2xl border border-slate-800 bg-slate-900/40 p-3 text-left transition-all hover:border-slate-700 hover:bg-slate-900"
+                        >
+                          <div className={`rounded-2xl border px-4 py-5 sm:px-5 sm:py-6 ${node.coverTone ?? 'bg-gradient-to-br from-emerald-500/20 via-slate-900 to-slate-950 border-emerald-500/30'}`}>
+                            <div className="mb-6 flex items-start justify-between gap-3">
+                              <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-200/80">
+                                {node.category ?? (node.type === 'dir' ? 'Folder' : 'Reading')}
+                              </span>
+                              <BookOpen className="h-5 w-5 shrink-0 text-slate-100/70" />
+                            </div>
+                            <div className="space-y-2">
+                              <h3 className="text-xl font-semibold leading-tight text-white">
+                                {node.title ?? name.replace(/\.md$/i, '')}
+                              </h3>
+                              <p className="text-xs uppercase tracking-[0.3em] text-slate-200/70">
+                                {node.author ?? 'Online Resource'}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-1 flex-col justify-between gap-4 px-1 pb-1 pt-4">
+                            <p className="text-sm leading-relaxed text-slate-400">
+                              {node.summary ?? 'Bacaan online yang dapat dibuka dari panel preview ini.'}
+                            </p>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-medium text-emerald-300">Buka ringkasan</span>
+                              <span className="text-slate-500 transition-colors group-hover:text-slate-300">
+                                {node.type === 'dir' ? 'Masuk folder' : 'Baca sekarang'}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {currentDirEntries.length === 0 && (
+                      <div className="col-span-full py-12 flex flex-col items-center text-slate-500">
+                        <Search className="w-10 h-10 sm:w-12 sm:h-12 mb-3 opacity-20" />
+                        <p className="text-sm">Rak buku ini masih kosong.</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+                    {currentPath.length > 0 && (
+                       <button
+                          onClick={() => handleGuiAction('back')}
+                          className="group flex flex-col items-center justify-center p-2 sm:p-4 rounded-xl bg-slate-800/30 hover:bg-slate-800 border border-transparent hover:border-slate-700 transition-all"
+                        >
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-800 group-hover:bg-slate-700 rounded-full flex items-center justify-center mb-2 sm:mb-3 shrink-0">
+                             <CornerDownLeft className="w-4 h-4 sm:w-6 sm:h-6 text-slate-400" />
+                          </div>
+                          <span className="text-[10px] sm:text-sm font-medium text-slate-400 group-hover:text-slate-200">Kembali</span>
+                       </button>
+                    )}
+
+                    {currentDirEntries.map(([name, node]) => (
+                      <button
+                        key={name}
+                        onClick={() => handleGuiAction(node.type === 'dir' ? 'cd' : 'open', name)}
                         className="group flex flex-col items-center justify-center p-2 sm:p-4 rounded-xl bg-slate-800/30 hover:bg-slate-800 border border-transparent hover:border-slate-700 transition-all"
                       >
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-800 group-hover:bg-slate-700 rounded-full flex items-center justify-center mb-2 sm:mb-3 shrink-0">
-                           <CornerDownLeft className="w-4 h-4 sm:w-6 sm:h-6 text-slate-400" />
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-2 sm:mb-3 transition-colors shrink-0 ${
+                          node.type === 'dir' 
+                            ? 'bg-blue-500/10 text-blue-400 group-hover:bg-blue-500/20' 
+                            : 'bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500/20'
+                        }`}>
+                          {node.type === 'dir' ? <Folder className="w-5 h-5 sm:w-6 sm:h-6" /> : <FileText className="w-5 h-5 sm:w-6 sm:h-6" />}
                         </div>
-                        <span className="text-[10px] sm:text-sm font-medium text-slate-400 group-hover:text-slate-200">Kembali</span>
-                     </button>
-                  )}
-
-                  {currentDirNode && Object.entries(currentDirNode.children)
-                    .filter(([name]) => !name.startsWith('.'))
-                    .map(([name, node]) => (
-                    <button
-                      key={name}
-                      onClick={() => handleGuiAction(node.type === 'dir' ? 'cd' : 'open', name)}
-                      className="group flex flex-col items-center justify-center p-2 sm:p-4 rounded-xl bg-slate-800/30 hover:bg-slate-800 border border-transparent hover:border-slate-700 transition-all"
-                    >
-                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-2 sm:mb-3 transition-colors shrink-0 ${
-                        node.type === 'dir' 
-                          ? 'bg-blue-500/10 text-blue-400 group-hover:bg-blue-500/20' 
-                          : 'bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500/20'
-                      }`}>
-                        {node.type === 'dir' ? <Folder className="w-5 h-5 sm:w-6 sm:h-6" /> : <FileText className="w-5 h-5 sm:w-6 sm:h-6" />}
+                        <span className="text-[10px] sm:text-sm font-medium text-slate-300 group-hover:text-white truncate w-full text-center px-1">
+                          {name}
+                        </span>
+                        <span className="text-[9px] sm:text-xs text-slate-500 mt-1 capitalize hidden sm:block">{node.type}</span>
+                      </button>
+                    ))}
+                    
+                    {currentDirEntries.length === 0 && (
+                      <div className="col-span-full py-12 flex flex-col items-center text-slate-500">
+                        <Search className="w-10 h-10 sm:w-12 sm:h-12 mb-3 opacity-20" />
+                        <p className="text-sm">Direktori ini kosong.</p>
                       </div>
-                      <span className="text-[10px] sm:text-sm font-medium text-slate-300 group-hover:text-white truncate w-full text-center px-1">
-                        {name}
-                      </span>
-                      <span className="text-[9px] sm:text-xs text-slate-500 mt-1 capitalize hidden sm:block">{node.type}</span>
-                    </button>
-                  ))}
-                  
-                  {currentDirNode && Object.keys(currentDirNode.children).length === 0 && (
-                    <div className="col-span-full py-12 flex flex-col items-center text-slate-500">
-                      <Search className="w-10 h-10 sm:w-12 sm:h-12 mb-3 opacity-20" />
-                      <p className="text-sm">Direktori ini kosong.</p>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
