@@ -45,10 +45,10 @@ function SampleDomainList({ targets, onPick }) {
           onClick={() => onPick(target.hostname)}
           className="flex h-full min-w-0 flex-col rounded-2xl border border-slate-800 bg-slate-950/70 p-4 text-left transition hover:border-cyan-500/30 hover:bg-slate-950"
         >
-          <div className="text-base font-semibold leading-tight text-slate-100">{target.label}</div>
-          <div className="mt-2 break-all font-mono text-[11px] leading-5 text-cyan-300">{target.hostname}</div>
-          <div className="mt-4 text-[10px] uppercase tracking-[0.22em] text-slate-500">{target.provider}</div>
-          <p className="mt-2 text-[13px] leading-6 text-slate-400">{target.notes}</p>
+          <div className="text-[15px] font-semibold leading-6 text-slate-100">{target.label}</div>
+          <div className="mt-2 break-all font-mono text-[10px] leading-5 text-cyan-300">{target.hostname}</div>
+          <div className="mt-4 text-[9px] uppercase tracking-[0.2em] text-slate-500">{target.provider}</div>
+          <p className="mt-2 text-[12px] leading-6 text-slate-400">{target.notes}</p>
         </button>
       ))}
     </div>
@@ -61,33 +61,33 @@ function ResultCard({ title, result }) {
 
   return (
     <div className={`min-w-0 rounded-3xl border p-5 ${style.card}`}>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex items-start gap-3">
           <ResultIcon className="mt-0.5 h-5 w-5 shrink-0" />
           <div className="min-w-0">
-            <div className="text-xs uppercase tracking-[0.2em] text-slate-400">{title}</div>
-            <div className="mt-2 break-words text-lg font-semibold leading-snug text-slate-100">{result.verdict}</div>
+            <div className="text-[11px] uppercase tracking-[0.16em] text-slate-400">{title}</div>
+            <div className="mt-2 break-words text-[17px] font-semibold leading-8 text-slate-100">{result.verdict}</div>
           </div>
         </div>
-        <div className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${style.badge}`}>
+        <div className={`inline-flex shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold ${style.badge}`}>
           {result.status}
         </div>
       </div>
 
-      <p className="mt-4 text-sm leading-relaxed text-slate-200/90">{result.summary}</p>
+      <p className="mt-4 text-[13px] leading-7 text-slate-200/90">{result.summary}</p>
 
       {result.rawRecord && (
-        <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
-          <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Record yang dinilai</div>
-          <pre className="mt-2 whitespace-pre-wrap break-words font-mono text-xs text-cyan-200">{result.rawRecord}</pre>
+        <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+          <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Record yang dinilai</div>
+          <pre className="mt-3 whitespace-pre-wrap break-words font-mono text-[11px] leading-7 text-cyan-200">{result.rawRecord}</pre>
         </div>
       )}
 
       {Array.isArray(result.rawMatches) && result.rawMatches.length > 1 && (
-        <div className="mt-4 space-y-2 rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
-          <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Record terkait</div>
+        <div className="mt-4 space-y-2 rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+          <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Record terkait</div>
           {result.rawMatches.map((record, index) => (
-            <pre key={`${title}-${index}`} className="whitespace-pre-wrap break-words font-mono text-xs text-slate-200">
+            <pre key={`${title}-${index}`} className="whitespace-pre-wrap break-words font-mono text-[11px] leading-7 text-slate-200">
               {record}
             </pre>
           ))}

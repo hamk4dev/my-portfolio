@@ -81,17 +81,17 @@ function AllowedTargetList({ targets, onPick }) {
         >
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <div className="text-base font-semibold leading-tight text-slate-100">{target.label}</div>
+              <div className="text-[15px] font-semibold leading-6 text-slate-100">{target.label}</div>
               <div className="shrink-0 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-emerald-300">
                 Legal Lab
               </div>
             </div>
-            <div className="mt-2 break-all font-mono text-[11px] leading-5 text-emerald-300">
+            <div className="mt-2 break-all font-mono text-[10px] leading-5 text-emerald-300">
               {target.hostname}
             </div>
           </div>
-          <div className="mt-4 text-[10px] uppercase tracking-[0.22em] text-slate-500">{target.provider}</div>
-          <p className="mt-2 text-[13px] leading-6 text-slate-400">{target.notes}</p>
+          <div className="mt-4 text-[9px] uppercase tracking-[0.2em] text-slate-500">{target.provider}</div>
+          <p className="mt-2 text-[12px] leading-6 text-slate-400">{target.notes}</p>
         </button>
       ))}
     </div>
