@@ -50,18 +50,28 @@ export default function PortfolioOS() {
   const [activeTask, setActiveTask] = useState('Menyiapkan antarmuka...');
   
   const endOfTerminalRef = useRef(null);
+  const terminalViewportRef = useRef(null);
   const inputRef = useRef(null);
 
   const queueTerminalScroll = () => {
     setTimeout(() => {
-      endOfTerminalRef.current?.scrollIntoView({ behavior: 'smooth' });
+      const terminalViewport = terminalViewportRef.current;
+      if (!terminalViewport) return;
+      terminalViewport.scrollTo({
+        top: terminalViewport.scrollHeight,
+        behavior: 'smooth',
+      });
     }, 100);
   };
 
   const focusTerminalInput = (force = false) => {
     if (!inputRef.current) return;
     if (force || (typeof window !== 'undefined' && window.innerWidth >= 768)) {
-      inputRef.current.focus();
+      try {
+        inputRef.current.focus({ preventScroll: true });
+      } catch {
+        inputRef.current.focus();
+      }
     }
   };
 
@@ -75,7 +85,12 @@ export default function PortfolioOS() {
   }, []);
 
   useEffect(() => {
-    endOfTerminalRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const terminalViewport = terminalViewportRef.current;
+    if (!terminalViewport) return;
+    terminalViewport.scrollTo({
+      top: terminalViewport.scrollHeight,
+      behavior: 'smooth',
+    });
   }, [history]);
 
   useEffect(() => {
@@ -912,7 +927,11 @@ ATURAN SANGAT KETAT:
             Terminal
           </div>
           
-          <div className="flex-1 p-3 sm:p-4 overflow-y-auto min-h-0" onClick={() => focusTerminalInput(true)}>
+          <div
+            ref={terminalViewportRef}
+            className="flex-1 p-3 sm:p-4 overflow-y-auto min-h-0"
+            onClick={() => focusTerminalInput(true)}
+          >
             {history.map((line) => {
               if (line.type === 'ai_output') {
                 return (
@@ -1022,9 +1041,9 @@ ATURAN SANGAT KETAT:
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 {isAppNode ? (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-950/80 px-4 py-3">
-                      <div className="flex items-center text-emerald-400 text-sm sm:text-base font-medium truncate">
-                        <FileText className="w-4 h-4 mr-2 shrink-0" />
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-slate-700 pb-2 gap-3">
+                      <div className="flex items-center text-emerald-400 text-base sm:text-lg font-medium truncate">
+                        <FileText className="w-4 h-4 sm:w-5 sm:h-5 mr-2 shrink-0" />
                         <span className="truncate">{selectedNode.name}</span>
                       </div>
                       <button 
@@ -1034,7 +1053,7 @@ ATURAN SANGAT KETAT:
                         }}
                         className="text-[10px] sm:text-xs bg-slate-800 hover:bg-slate-700 px-2 sm:px-3 py-1.5 rounded text-slate-300 transition-colors whitespace-nowrap"
                       >
-                        Tutup
+                        Tutup Preview
                       </button>
                     </div>
 
