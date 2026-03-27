@@ -23,7 +23,7 @@ export async function GET() {
     {
       status: 'ok',
       services: {
-        ai: Boolean(geminiApiKey),
+        ai: Boolean(geminiApiKey && !geminiApiKey.startsWith('masukkan_')), 
         turnstile: turnstileConfigured,
         ipReputation: Boolean(abuseIpDbApiKey),
         contact: Boolean(resendApiKey && contactFromEmail && contactToEmail),

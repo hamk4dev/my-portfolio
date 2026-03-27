@@ -47,7 +47,7 @@ const fetchWithTimeout = async (input, init = {}, timeoutMs = 12000) => {
 };
 
 export const callGemini = async (prompt, systemInstruction) => {
-  const response = await fetch('/api/ai/chat', {
+  const response = await fetchWithTimeout('/api/ai/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prompt, systemInstruction }),
@@ -160,3 +160,4 @@ export const submitScanAccessRequest = async (payload) => {
 
   return response.json();
 };
+

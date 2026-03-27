@@ -21,7 +21,6 @@ const initialRequestForm = {
   contact: '',
   reason: '',
   website: '',
-  ownershipConfirmed: false,
 };
 
 const severityStyles = {
@@ -180,7 +179,7 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
   };
 
   const handleRequestFieldChange = (field) => (event) => {
-    const value = field === 'ownershipConfirmed' ? event.target.checked : event.target.value;
+    const value = event.target.value;
     setRequestForm((current) => ({
       ...current,
       [field]: value,
@@ -209,7 +208,7 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
         targetType: 'domain',
       });
 
-      setRequestFeedback(response.message || 'Permintaan izin domain berhasil dikirim.');
+      setRequestFeedback(response.message || 'Pesan berhasil dikirim.');
       setRequestForm(initialRequestForm);
     } catch (submitError) {
       setRequestError(submitError.message);
@@ -233,7 +232,7 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
           </div>
 
           <div className="rounded-2xl border border-cyan-500/20 bg-cyan-950/20 px-4 py-3 text-sm text-cyan-100/85 lg:max-w-sm">
-            Analyzer ini dibatasi untuk domain demonstrasi aman. Domain lain akan diarahkan ke review manual.
+            Analyzer ini dibatasi untuk domain demonstrasi aman. Domain lain akan diarahkan ke form pesan untuk akses pengujian penuh.
           </div>
         </div>
 
@@ -295,10 +294,10 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
             <div className="flex items-start gap-3">
               <Lock className="mt-0.5 h-5 w-5 shrink-0 text-amber-300" />
               <div>
-                <div className="text-sm font-semibold text-amber-200">Domain ini perlu ditinjau lebih dulu</div>
-                <p className="mt-2 text-sm leading-relaxed text-amber-100/85">{policyBlock.error}</p>
+                <div className="text-sm font-semibold text-amber-200">Kirim pesan untuk mendapatkan akses pengujian penuh</div>
+                <p className="mt-2 text-sm leading-relaxed text-amber-100/85">Target ini belum tersedia untuk pengujian langsung dari tool ini. Jika Anda membutuhkan akses pengujian penuh, kirim pesan melalui form di bawah.</p>
                 <div className="mt-3 rounded-2xl border border-slate-700 bg-slate-950/60 px-3 py-3 text-xs text-slate-300">
-                  <div className="font-semibold text-slate-100">Domain yang dimasukkan</div>
+                  <div className="font-semibold text-slate-100">Target</div>
                   <div className="mt-1 break-all font-mono text-amber-200">{policyBlock.blockedTarget}</div>
                 </div>
               </div>
@@ -312,7 +311,7 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
             isSubmitting={isSubmittingRequest}
             error={requestError}
             feedback={requestFeedback}
-            description="Jika Anda pemilik domain atau memiliki izin tertulis, kirim permintaan ini untuk review manual."
+            description="Kirim pesan jika Anda membutuhkan akses pengujian penuh untuk target ini."
           />
         </section>
       )}
@@ -369,3 +368,6 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
     </div>
   );
 }
+
+
+

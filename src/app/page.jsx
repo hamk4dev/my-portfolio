@@ -155,23 +155,43 @@ export default function PortfolioOS() {
 
   const handleDragEnd = () => setIsDragging(false);
 
-  const MAX_DAILY_CALLS = 10;
-  const checkRateLimit = () => {
+  const MAX_DAILY_CALLS = 50;
+  const AI_USAGE_STORAGE_KEY = 'portfolio_ai_usage_v2';
+  const getAiQuotaExceededMessage = () => 'Batas penggunaan AI untuk hari ini sudah tercapai. Coba lagi besok.';
+
+  const getAiUsageSnapshot = () => {
+    const today = new Date().toDateString();
+    const usage = JSON.parse(localStorage.getItem(AI_USAGE_STORAGE_KEY) || '{}');
+
+    if (usage.date !== today || !Number.isFinite(usage.count)) {
+      return { date: today, count: 0 };
+    }
+
+    return {
+      date: today,
+      count: usage.count,
+    };
+  };
+
+  const hasRemainingAiQuota = () => {
     try {
-      const today = new Date().toDateString();
-      const usage = JSON.parse(localStorage.getItem('portfolio_ai_usage') || '{}');
-      if (usage.date !== today) {
-        localStorage.setItem('portfolio_ai_usage', JSON.stringify({ date: today, count: 1 }));
-        return true;
-      }
-      if (usage.count >= MAX_DAILY_CALLS) {
-        return false;
-      }
-      localStorage.setItem('portfolio_ai_usage', JSON.stringify({ date: today, count: usage.count + 1 }));
-      return true;
-    } catch (e) {
+      return getAiUsageSnapshot().count < MAX_DAILY_CALLS;
+    } catch {
       return true;
     }
+  };
+
+  const recordAiUsage = () => {
+    try {
+      const usage = getAiUsageSnapshot();
+      localStorage.setItem(
+        AI_USAGE_STORAGE_KEY,
+        JSON.stringify({
+          date: usage.date,
+          count: usage.count + 1,
+        })
+      );
+    } catch {}
   };
 
   // Client guard only. API routes still enforce server-side validation and rate limiting.
@@ -201,6 +221,7 @@ export default function PortfolioOS() {
   const getAiErrorMessage = (error) => {
     if (error?.status === 413) return 'Permintaan AI terlalu panjang. Coba ringkas isi yang diminta.';
     if (error?.status === 429) return 'Permintaan AI sedang padat. Coba lagi beberapa saat lagi.';
+    if (error?.status === 504) return 'Layanan AI memerlukan waktu lebih lama dari biasanya. Coba lagi sebentar lagi.';
     if (error?.status === 403) return getAccessLockedMessage('Fitur AI');
     return getAiUnavailableMessage();
   };
@@ -238,7 +259,7 @@ export default function PortfolioOS() {
   const handleGeneratePitch = () => {
     setShowPitchModal(true);
     setCopyFeedback('');
-    const canReusePitch = pitchContent && !/^(Fitur AI|Kuota AI|Permintaan AI|Elevator Pitch belum tersedia)/.test(pitchContent);
+    const canReusePitch = pitchContent && !/^(Fitur AI|Kuota AI|Permintaan AI|Elevator Pitch belum tersedia|Batas penggunaan AI)/.test(pitchContent);
     if (canReusePitch) return;
 
     if (!hasProtectedAccess) {
@@ -251,8 +272,8 @@ export default function PortfolioOS() {
       return;
     }
     
-    if (!checkRateLimit()) {
-      setPitchContent('Kuota AI harian Anda telah habis. Silakan coba lagi besok.');
+    if (!hasRemainingAiQuota()) {
+      setPitchContent(getAiQuotaExceededMessage());
       return;
     }
 
@@ -267,7 +288,10 @@ ATURAN SANGAT KETAT:
 3. Jangan menggunakan banyak simbol markdown.`;
 
     callGemini(prompt, systemInstruction)
-      .then(res => setPitchContent(res))
+      .then(res => {
+        recordAiUsage();
+        setPitchContent(res);
+      })
       .catch(err => setPitchContent(getAiErrorMessage(err)))
       .finally(() => setIsGeneratingPitch(false));
   };
@@ -634,8 +658,8 @@ ATURAN SANGAT KETAT:
              break;
           }
 
-          if (!checkRateLimit()) {
-             print(getTerminalToolError('ai', 'Kuota AI harian Anda sudah habis. Coba lagi besok.'), 'error');
+          if (!hasRemainingAiQuota()) {
+             print(getTerminalToolError('ai', getAiQuotaExceededMessage()), 'error');
              break;
           }
 
@@ -659,6 +683,7 @@ ${portfolioData}
 
           callGemini(prompt, strictSystemPrompt)
             .then(res => {
+              recordAiUsage();
               setHistory(prev => [...prev, { id: Date.now(), type: 'ai_output', text: res }]);
             })
             .catch(err => {
@@ -777,6 +802,7 @@ ${portfolioData}
   const isContactApp = selectedNode?.app === 'contact-hub';
   const isEmailAuthApp = selectedNode?.app === 'email-auth-analyzer';
   const isScannerApp = selectedNode?.app === 'web-security-scanner';
+  const isAppNode = isContactApp || isEmailAuthApp || isScannerApp;
 
   return (
     <div className="flex flex-col h-[100dvh] bg-slate-950 text-slate-300 font-sans overflow-hidden">
@@ -939,93 +965,116 @@ ${portfolioData}
           <div className="flex-1 p-4 sm:p-6 overflow-y-auto min-h-0">
             {selectedNode ? (
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-slate-700 pb-2 gap-3">
-                  <div className="flex items-center text-emerald-400 text-base sm:text-lg font-medium truncate">
-                    <FileText className="w-4 h-4 sm:w-5 sm:h-5 mr-2 shrink-0" />
-                    <span className="truncate">{selectedNode.name}</span>
-                  </div>
-                  <div className="flex items-center space-x-2 shrink-0">
-                    <button 
-                      onClick={() => {
-                        if (isGenerating) return;
-                        if (summaryCache[selectedNodeCacheKey]) {
-                          setAiSummary(summaryCache[selectedNodeCacheKey]);
-                          return;
-                        }
-                        if (!hasProtectedAccess) {
-                          setAiSummary(getAccessLockedMessage('Ringkasan AI')); 
-                          return;
-                        }
-                        if (isAiAvailable === false) {
-                          setAiSummary(getAiUnavailableMessage());
-                          return;
-                        }
-                        if (!checkRateLimit()) {
-                          setAiSummary('Kuota AI harian Anda telah habis. Silakan coba lagi besok.');
-                          return;
-                        }
-                        setIsGenerating(true);
-                        const summaryPrompt = `Ringkas konten file berikut:\n\n${selectedNode.content.slice(0, 5000)}`;
-                        const summarySystem = `Kamu adalah asisten sistem.\nATURAN SANGAT KETAT:\n1. LANGSUNG berikan ringkasan.\n2. Gunakan format bersih.\n3. Jangan menebalkan kata di awal list.`;
-                        callGemini(summaryPrompt, summarySystem)
-                          .then(res => {
-                            setAiSummary(res);
-                            setSummaryCache(prev => ({ ...prev, [selectedNodeCacheKey]: res }));
-                          })
-                          .catch(err => setAiSummary(getAiErrorMessage(err)))
-                          .finally(() => setIsGenerating(false));
-                      }}
-                      disabled={isGenerating}
-                      className="flex items-center text-[10px] sm:text-xs bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 px-2 sm:px-3 py-1.5 rounded transition-colors disabled:opacity-50 whitespace-nowrap"
-                    >
-                      {isGenerating ? <span className="animate-pulse">Loading...</span> : <><Rocket className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1" /> Ringkas File</>}
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setSelectedNode(null);
-                        setAiSummary(null);
-                      }}
-                      className="text-[10px] sm:text-xs bg-slate-800 hover:bg-slate-700 px-2 sm:px-3 py-1.5 rounded text-slate-300 transition-colors whitespace-nowrap"
-                    >
-                      Tutup Preview
-                    </button>
-                  </div>
-                </div>
-
-                {aiSummary && (
-                  <div className="mb-4 bg-indigo-950/40 border border-indigo-500/30 p-3 sm:p-4 rounded-lg relative animate-in fade-in slide-in-from-top-2">
-                    <div className="flex items-center text-indigo-300 mb-2 font-medium text-xs sm:text-sm">
-                      <Rocket className="w-4 h-4 mr-2 shrink-0" /> Ringkasan File
+                {isAppNode ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-950/80 px-4 py-3">
+                      <div className="flex items-center text-emerald-400 text-sm sm:text-base font-medium truncate">
+                        <FileText className="w-4 h-4 mr-2 shrink-0" />
+                        <span className="truncate">{selectedNode.name}</span>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          setSelectedNode(null);
+                          setAiSummary(null);
+                        }}
+                        className="text-[10px] sm:text-xs bg-slate-800 hover:bg-slate-700 px-2 sm:px-3 py-1.5 rounded text-slate-300 transition-colors whitespace-nowrap"
+                      >
+                        Tutup
+                      </button>
                     </div>
-                    <div className="text-xs sm:text-sm text-indigo-100/80 leading-relaxed">
-                      {renderDocumentContent(aiSummary)}
-                    </div>
-                  </div>
-                )}
 
-                {isContactApp ? (
-                  <ContactHub systemHealth={systemHealth} siteAccessMode={siteAccessMode} />
-                ) : isEmailAuthApp ? (
-                  <EmailAuthAnalyzer siteAccessMode={siteAccessMode} />
-                ) : isScannerApp ? (
-                  <WebSecurityScanner siteAccessMode={siteAccessMode} />
+                    {isContactApp ? (
+                      <ContactHub systemHealth={systemHealth} siteAccessMode={siteAccessMode} />
+                    ) : isEmailAuthApp ? (
+                      <EmailAuthAnalyzer siteAccessMode={siteAccessMode} />
+                    ) : (
+                      <WebSecurityScanner siteAccessMode={siteAccessMode} />
+                    )}
+                  </div>
                 ) : (
-                  <div className="bg-slate-950 p-4 sm:p-6 rounded-lg border border-slate-800 shadow-inner flex flex-col sm:flex-row gap-4 sm:gap-6">
-                    {selectedNode.image && (
-                      <div className="shrink-0 flex justify-center sm:block">
-                        <img 
-                          src={selectedNode.image} 
-                          alt={selectedNode.name} 
-                          loading="lazy"
-                          className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-xl border border-slate-700 shadow-md grayscale hover:grayscale-0 transition-all duration-300"
-                          onError={(e) => { e.target.style.display = 'none'; }}
-                        />
+                  <>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-slate-700 pb-2 gap-3">
+                      <div className="flex items-center text-emerald-400 text-base sm:text-lg font-medium truncate">
+                        <FileText className="w-4 h-4 sm:w-5 sm:h-5 mr-2 shrink-0" />
+                        <span className="truncate">{selectedNode.name}</span>
+                      </div>
+                      <div className="flex items-center space-x-2 shrink-0">
+                        <button 
+                          onClick={() => {
+                            if (isGenerating) return;
+                            if (summaryCache[selectedNodeCacheKey]) {
+                              setAiSummary(summaryCache[selectedNodeCacheKey]);
+                              return;
+                            }
+                            if (!hasProtectedAccess) {
+                              setAiSummary(getAccessLockedMessage('Ringkasan AI')); 
+                              return;
+                            }
+                            if (isAiAvailable === false) {
+                              setAiSummary(getAiUnavailableMessage());
+                              return;
+                            }
+                            if (!hasRemainingAiQuota()) {
+                              setAiSummary(getAiQuotaExceededMessage());
+                              return;
+                            }
+                            setIsGenerating(true);
+                            const summaryPrompt = `Ringkas konten file berikut:\n\n${selectedNode.content.slice(0, 5000)}`;
+                            const summarySystem = `Kamu adalah asisten sistem.\nATURAN SANGAT KETAT:\n1. LANGSUNG berikan ringkasan.\n2. Gunakan format bersih.\n3. Jangan menebalkan kata di awal list.`;
+                            callGemini(summaryPrompt, summarySystem)
+                              .then(res => {
+                                recordAiUsage();
+                                setAiSummary(res);
+                                setSummaryCache(prev => ({ ...prev, [selectedNodeCacheKey]: res }));
+                              })
+                              .catch(err => setAiSummary(getAiErrorMessage(err)))
+                              .finally(() => setIsGenerating(false));
+                          }}
+                          disabled={isGenerating}
+                          className="flex items-center text-[10px] sm:text-xs bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 px-2 sm:px-3 py-1.5 rounded transition-colors disabled:opacity-50 whitespace-nowrap"
+                        >
+                          {isGenerating ? <span className="animate-pulse">Loading...</span> : <><Rocket className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1" /> Ringkas File</>}
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setSelectedNode(null);
+                            setAiSummary(null);
+                          }}
+                          className="text-[10px] sm:text-xs bg-slate-800 hover:bg-slate-700 px-2 sm:px-3 py-1.5 rounded text-slate-300 transition-colors whitespace-nowrap"
+                        >
+                          Tutup Preview
+                        </button>
+                      </div>
+                    </div>
+
+                    {aiSummary && (
+                      <div className="mb-4 bg-indigo-950/40 border border-indigo-500/30 p-3 sm:p-4 rounded-lg relative animate-in fade-in slide-in-from-top-2">
+                        <div className="flex items-center text-indigo-300 mb-2 font-medium text-xs sm:text-sm">
+                          <Rocket className="w-4 h-4 mr-2 shrink-0" /> Ringkasan File
+                        </div>
+                        <div className="text-xs sm:text-sm text-indigo-100/80 leading-relaxed">
+                          {renderDocumentContent(aiSummary)}
+                        </div>
                       </div>
                     )}
-                    <div className="font-mono text-xs sm:text-sm text-slate-300 break-words flex-1 w-full min-w-0">
-                      {renderDocumentContent(selectedNode.content)}
+
+                    <div className="bg-slate-950 p-4 sm:p-6 rounded-lg border border-slate-800 shadow-inner flex flex-col sm:flex-row gap-4 sm:gap-6">
+                      {selectedNode.image && (
+                        <div className="shrink-0 flex justify-center sm:block">
+                          <img 
+                            src={selectedNode.image} 
+                            alt={selectedNode.name} 
+                            loading="lazy"
+                            className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-xl border border-slate-700 shadow-md grayscale hover:grayscale-0 transition-all duration-300"
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                        </div>
+                      )}
+                      <div className="font-mono text-xs sm:text-sm text-slate-300 break-words flex-1 w-full min-w-0">
+                        {renderDocumentContent(selectedNode.content)}
+                      </div>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             ) : 
@@ -1153,6 +1202,8 @@ ${portfolioData}
     </div>
   );
 }
+
+
 
 
 

@@ -34,7 +34,6 @@ function validatePayload(payload) {
   const contact = typeof payload.contact === 'string' ? payload.contact.trim() : '';
   const reason = typeof payload.reason === 'string' ? payload.reason.trim() : '';
   const website = typeof payload.website === 'string' ? payload.website.trim() : '';
-  const ownershipConfirmed = payload.ownershipConfirmed === true;
   const targetType = payload.targetType === 'domain' ? 'domain' : 'url';
   const toolName = typeof payload.toolName === 'string' ? payload.toolName.trim() : 'Security Analyzer';
 
@@ -42,12 +41,9 @@ function validatePayload(payload) {
     return { ok: false, status: 400, error: 'Permintaan ditolak.' };
   }
 
-  if (!ownershipConfirmed) {
-    return { ok: false, status: 400, error: 'Konfirmasi kepemilikan atau izin tertulis wajib dicentang.' };
-  }
 
   if (!name || !contact || !reason) {
-    return { ok: false, status: 400, error: 'Nama, kontak, dan alasan pengujian wajib diisi.' };
+    return { ok: false, status: 400, error: 'Nama, kontak, dan pesan wajib diisi.' };
   }
 
   if (
@@ -89,7 +85,7 @@ function validatePayload(payload) {
     return {
       ok: false,
       status: 400,
-      error: 'Domain ini sudah berada dalam daftar aman analyzer email. Permintaan izin manual tidak diperlukan.',
+      error: 'Domain ini sudah tersedia untuk pengujian langsung dari analyzer ini.',
     };
   }
 
@@ -97,7 +93,7 @@ function validatePayload(payload) {
     return {
       ok: false,
       status: 400,
-      error: 'Domain ini sudah berada dalam daftar aman. Permintaan izin manual tidak diperlukan.',
+      error: 'Domain ini sudah tersedia untuk pengujian langsung dari tool ini.',
     };
   }
 
@@ -117,13 +113,13 @@ function validatePayload(payload) {
 }
 
 async function sendScanAccessRequest({ name, contact, reason, toolName, targetType, targetValue, targetHost, isEmail, clientIp }) {
-  const subject = `Permintaan Izin ${toolName} untuk ${targetHost}`;
+  const subject = `Permintaan Akses Pengujian Penuh untuk ${targetHost}`;
   const timestamp = new Date().toISOString();
 
   const html = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
-      <h2>Permintaan Izin Pemindaian Domain</h2>
-      <p>Engine keamanan menolak target di luar allowlist dan pengguna meminta evaluasi manual.</p>
+      <h2>Permintaan Akses Pengujian Penuh</h2>
+      <p>Pengguna meminta akses pengujian penuh untuk target yang belum tersedia langsung dari tool.</p>
       <p><strong>Tool:</strong> ${escapeHtml(toolName)}</p>
       <p><strong>Nama:</strong> ${escapeHtml(name)}</p>
       <p><strong>Kontak:</strong> ${escapeHtml(contact)}</p>
@@ -132,17 +128,16 @@ async function sendScanAccessRequest({ name, contact, reason, toolName, targetTy
       <p><strong>Host:</strong> ${escapeHtml(targetHost)}</p>
       <p><strong>IP Pengirim:</strong> ${escapeHtml(clientIp)}</p>
       <p><strong>Waktu UTC:</strong> ${escapeHtml(timestamp)}</p>
-      <p><strong>Pernyataan:</strong> Pengguna menyatakan dirinya pemilik domain atau memiliki izin tertulis.</p>
       <hr />
-      <p><strong>Alasan Pengujian:</strong></p>
+      <p><strong>Pesan:</strong></p>
       <p style="white-space: pre-wrap;">${escapeHtml(reason)}</p>
     </div>
   `;
 
   const text = [
-    'Permintaan Izin Pemindaian Domain',
+    'Permintaan Akses Pengujian Penuh',
     '',
-    'Engine keamanan menolak target di luar allowlist dan pengguna meminta evaluasi manual.',
+    'Pengguna meminta akses pengujian penuh untuk target yang belum tersedia langsung dari tool.',
     `Tool: ${toolName}`,
     `Nama: ${name}`,
     `Kontak: ${contact}`,
@@ -151,9 +146,8 @@ async function sendScanAccessRequest({ name, contact, reason, toolName, targetTy
     `Host: ${targetHost}`,
     `IP Pengirim: ${clientIp}`,
     `Waktu UTC: ${timestamp}`,
-    'Pernyataan: Pengguna menyatakan dirinya pemilik domain atau memiliki izin tertulis.',
     '',
-    'Alasan Pengujian:',
+    'Pesan:',
     reason,
   ].join('\n');
 
@@ -169,7 +163,7 @@ async function sendScanAccessRequest({ name, contact, reason, toolName, targetTy
     return {
       ok: false,
       status: 503,
-      error: 'Layanan email permintaan izin belum dikonfigurasi di server.',
+      error: 'Layanan email belum tersedia di server.',
     };
   }
 
@@ -193,7 +187,7 @@ export async function POST(req) {
 
     if (!rateLimit.allowed) {
       return NextResponse.json(
-        { error: 'Terlalu banyak permintaan izin domain. Coba lagi nanti.' },
+        { error: 'Terlalu banyak pesan permintaan. Coba lagi nanti.' },
         { status: 429 }
       );
     }
@@ -216,7 +210,7 @@ export async function POST(req) {
 
     return NextResponse.json({
       success: true,
-      message: 'Permintaan izin domain berhasil dikirim ke pemilik situs.',
+      message: 'Pesan akses pengujian penuh berhasil dikirim.',
       id: result.data?.id || null,
     });
   } catch (error) {
