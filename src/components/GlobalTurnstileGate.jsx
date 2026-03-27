@@ -85,7 +85,7 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
   }, []);
 
   useEffect(() => {
-    if (!turnstileToken || verified || limitedMode || isSubmitting) return;
+    if (!turnstileToken || verified || limitedMode) return;
 
     let cancelled = false;
 
@@ -105,8 +105,8 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
         setTurnstileToken('');
         setResetKey((value) => value + 1);
 
-        if (error.status === 502 || error.status === 503) {
-          setServiceIssue('Pemeriksaan akses sementara tidak tersedia. Anda tetap bisa membuka situs dalam mode terbatas.');
+        if (error.status === 502 || error.status === 503 || error.status === 504) {
+          setServiceIssue('Pemeriksaan akses sementara tidak tersedia. Anda tetap membuka situs dalam mode terbatas.');
         }
       } finally {
         if (!cancelled) {
@@ -120,7 +120,7 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
     return () => {
       cancelled = true;
     };
-  }, [isSubmitting, limitedMode, turnstileToken, verified]);
+  }, [limitedMode, turnstileToken, verified]);
 
   if (verified || limitedMode) return null;
 
@@ -134,7 +134,7 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
           <div>
             <h2 className="text-xl font-semibold text-slate-100">Pemeriksaan Akses</h2>
             <p className="mt-2 text-sm leading-relaxed text-slate-400">
-              Sebelum akses penuh dibuka, situs ini menjalankan pemeriksaan akses singkat untuk menjaga layanan tetap stabil.
+              Situs ini menjalankan pemeriksaan akses keamanan singkat.
             </p>
           </div>
         </div>
@@ -210,4 +210,6 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange })
     </div>
   );
 }
+
+
 

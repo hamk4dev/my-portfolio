@@ -24,6 +24,28 @@ const createApiError = async (response, fallbackMessage) => {
   return error;
 };
 
+const fetchWithTimeout = async (input, init = {}, timeoutMs = 12000) => {
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(input, {
+      ...init,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      const timeoutError = new Error('Permintaan memerlukan waktu lebih lama dari biasanya.');
+      timeoutError.status = 504;
+      throw timeoutError;
+    }
+
+    throw error;
+  } finally {
+    globalThis.clearTimeout(timeoutId);
+  }
+};
+
 export const callGemini = async (prompt, systemInstruction) => {
   const response = await fetch('/api/ai/chat', {
     method: 'POST',
@@ -88,7 +110,7 @@ export const getSystemHealthOnBackend = async () => {
 };
 
 export const getTurnstileSessionStatus = async () => {
-  const response = await fetch('/api/security/turnstile', { method: 'GET' });
+  const response = await fetchWithTimeout('/api/security/turnstile', { method: 'GET' });
 
   if (!response.ok) {
     throw await createApiError(response, 'Gagal memeriksa status Turnstile.');
@@ -98,7 +120,7 @@ export const getTurnstileSessionStatus = async () => {
 };
 
 export const verifyTurnstileSiteAccess = async (token) => {
-  const response = await fetch('/api/security/turnstile', {
+  const response = await fetchWithTimeout('/api/security/turnstile', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token }),
