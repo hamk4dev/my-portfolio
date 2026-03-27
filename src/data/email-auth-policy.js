@@ -11,20 +11,20 @@ export const emailAuthSuggestedTargets = [
   {
     hostname: 'cloudflare.com',
     label: 'Cloudflare',
-    provider: 'Public Domain Example',
-    notes: 'Contoh domain publik dengan konfigurasi email yang biasanya jelas untuk demonstrasi analisis SPF/DMARC.',
+    provider: 'Domain Publik',
+    notes: 'Contoh domain publik dengan konfigurasi email yang jelas untuk demonstrasi SPF dan DMARC.',
   },
   {
     hostname: 'openai.com',
     label: 'OpenAI',
-    provider: 'Public Domain Example',
-    notes: 'Contoh domain publik lain yang relevan untuk melihat kebijakan email tingkat organisasi.',
+    provider: 'Domain Publik',
+    notes: 'Contoh domain publik untuk melihat kebijakan email tingkat organisasi.',
   },
   {
     hostname: 'proton.me',
     label: 'Proton',
-    provider: 'Public Domain Example',
-    notes: 'Cocok untuk demonstrasi karena domain publik ini memang berfokus pada layanan email dan keamanan.',
+    provider: 'Domain Publik',
+    notes: 'Relevan untuk demonstrasi karena domain ini dekat dengan layanan email dan keamanan.',
   },
 ];
 

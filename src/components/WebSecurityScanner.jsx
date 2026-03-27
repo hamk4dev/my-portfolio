@@ -71,25 +71,27 @@ function ScoreCard({ label, value, tone }) {
 
 function AllowedTargetList({ targets, onPick }) {
   return (
-    <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
       {targets.map((target) => (
         <button
           key={target.hostname}
           type="button"
           onClick={() => onPick(`https://${target.hostname}`)}
-          className="min-w-0 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 text-left transition hover:border-emerald-500/30 hover:bg-slate-950"
+          className="flex h-full min-w-0 flex-col rounded-2xl border border-slate-800 bg-slate-950/70 p-4 text-left transition hover:border-emerald-500/30 hover:bg-slate-950"
         >
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <div className="font-semibold text-slate-100">{target.label}</div>
-              <div className="mt-1 break-all font-mono text-xs text-emerald-300">{target.hostname}</div>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="text-base font-semibold leading-tight text-slate-100">{target.label}</div>
+              <div className="shrink-0 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-emerald-300">
+                Legal Lab
+              </div>
             </div>
-            <div className="shrink-0 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
-              Legal Lab
+            <div className="mt-2 break-all font-mono text-[11px] leading-5 text-emerald-300">
+              {target.hostname}
             </div>
           </div>
-          <div className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">{target.provider}</div>
-          <p className="mt-2 break-words text-sm leading-relaxed text-slate-400">{target.notes}</p>
+          <div className="mt-4 text-[10px] uppercase tracking-[0.22em] text-slate-500">{target.provider}</div>
+          <p className="mt-2 text-[13px] leading-6 text-slate-400">{target.notes}</p>
         </button>
       ))}
     </div>
@@ -326,7 +328,7 @@ export default function WebSecurityScanner({ siteAccessMode = 'blocked' }) {
       {isScanning && (
         <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900/70 px-4 py-4 text-sm text-slate-300">
           <Loader2 className="h-4 w-4 animate-spin text-emerald-300" />
-          Memeriksa target secara aman di backend...
+          Menyiapkan hasil analisis target...
         </div>
       )}
 
@@ -381,9 +383,9 @@ export default function WebSecurityScanner({ siteAccessMode = 'blocked' }) {
             </div>
           </section>
 
-          {result.analysisContext?.reachabilityIssue && (
+          {result.analysisContext?.coverageNote && (
             <div className="rounded-3xl border border-amber-500/30 bg-amber-950/20 p-4 sm:p-5 text-sm leading-relaxed text-amber-100/90">
-              Assessment ini tidak sepenuhnya lengkap karena backend tidak bisa mengambil response target secara penuh. Detail: {result.analysisContext.reachabilityIssue}
+              {result.analysisContext.coverageNote}
             </div>
           )}
 

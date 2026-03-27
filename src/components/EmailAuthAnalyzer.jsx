@@ -37,18 +37,18 @@ const severityStyles = {
 
 function SampleDomainList({ targets, onPick }) {
   return (
-    <div className="grid gap-3 lg:grid-cols-3">
+    <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
       {targets.map((target) => (
         <button
           key={target.hostname}
           type="button"
           onClick={() => onPick(target.hostname)}
-          className="min-w-0 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 text-left transition hover:border-cyan-500/30 hover:bg-slate-950"
+          className="flex h-full min-w-0 flex-col rounded-2xl border border-slate-800 bg-slate-950/70 p-4 text-left transition hover:border-cyan-500/30 hover:bg-slate-950"
         >
-          <div className="font-semibold text-slate-100">{target.label}</div>
-          <div className="mt-1 break-all font-mono text-xs text-cyan-300">{target.hostname}</div>
-          <div className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">{target.provider}</div>
-          <p className="mt-2 break-words text-sm leading-relaxed text-slate-400">{target.notes}</p>
+          <div className="text-base font-semibold leading-tight text-slate-100">{target.label}</div>
+          <div className="mt-2 break-all font-mono text-[11px] leading-5 text-cyan-300">{target.hostname}</div>
+          <div className="mt-4 text-[10px] uppercase tracking-[0.22em] text-slate-500">{target.provider}</div>
+          <p className="mt-2 text-[13px] leading-6 text-slate-400">{target.notes}</p>
         </button>
       ))}
     </div>
@@ -66,7 +66,7 @@ function ResultCard({ title, result }) {
           <ResultIcon className="mt-0.5 h-5 w-5 shrink-0" />
           <div className="min-w-0">
             <div className="text-xs uppercase tracking-[0.2em] text-slate-400">{title}</div>
-            <div className="mt-2 break-words text-xl font-semibold leading-snug text-slate-100">{result.verdict}</div>
+            <div className="mt-2 break-words text-lg font-semibold leading-snug text-slate-100">{result.verdict}</div>
           </div>
         </div>
         <div className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${style.badge}`}>
@@ -263,7 +263,7 @@ export default function EmailAuthAnalyzer({ siteAccessMode = 'blocked' }) {
       {isAnalyzing && (
         <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900/70 px-4 py-4 text-sm text-slate-300">
           <Loader2 className="h-4 w-4 animate-spin text-cyan-300" />
-          Melakukan query TXT DNS secara real-time...
+          Menyiapkan hasil analisis domain...
         </div>
       )}
 

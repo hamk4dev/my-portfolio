@@ -6,7 +6,8 @@ import { consumeRateLimit } from '@/lib/server/rate-limit';
 import { assertJsonRequest, assertSameOriginRequest } from '@/lib/server/request-guards';
 import { hasValidTurnstileSession } from '@/lib/server/turnstile-session';
 
-const REQUEST_TIMEOUT_MS = 7000;
+const REQUEST_TIMEOUT_MS = 9000;
+const DOCUMENT_REQUEST_TIMEOUT_MS = 10000;
 const MAX_REDIRECTS = 3;
 const HTML_CAPTURE_LIMIT = 150000;
 const SCAN_INPUT_ERRORS = new Set([
@@ -66,7 +67,7 @@ const finalizeCategory = (category) => {
   };
 };
 
-async function fetchWithRedirects(initialUrl, { method = 'HEAD', allowGetFallback = false } = {}) {
+async function fetchWithRedirects(initialUrl, { method = 'HEAD', allowGetFallback = false, timeoutMs = REQUEST_TIMEOUT_MS } = {}) {
   let currentUrl = initialUrl;
 
   for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount += 1) {
@@ -74,7 +75,7 @@ async function fetchWithRedirects(initialUrl, { method = 'HEAD', allowGetFallbac
       method,
       redirect: 'manual',
       cache: 'no-store',
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      signal: AbortSignal.timeout(timeoutMs),
       headers:
         method === 'GET'
           ? {
@@ -88,7 +89,7 @@ async function fetchWithRedirects(initialUrl, { method = 'HEAD', allowGetFallbac
         method: 'GET',
         redirect: 'manual',
         cache: 'no-store',
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+        signal: AbortSignal.timeout(timeoutMs),
         headers: {
           Accept: 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8',
         },
@@ -246,6 +247,48 @@ const analyzeExposureCategory = (exposureCategory, headers, cookies) => {
   });
 };
 
+const analyzeTransportCategory = (transportCategory, { httpStatus, finalTarget, targetUrl, headers }) => {
+  addCheck(transportCategory, {
+    status: httpStatus >= 200 && httpStatus < 400 ? 'PASS' : httpStatus < 500 ? 'WARN' : 'FAIL',
+    severity: httpStatus >= 200 && httpStatus < 400 ? 'PASS' : httpStatus < 500 ? 'MEDIUM' : 'HIGH',
+    name: 'HTTP Response Status',
+    desc: `Target merespons dengan status HTTP ${httpStatus}.`,
+    penalty: httpStatus >= 200 && httpStatus < 400 ? 0 : httpStatus < 500 ? 6 : 12,
+  });
+
+  addCheck(transportCategory, {
+    status: finalTarget.hostname === targetUrl.hostname ? 'PASS' : 'WARN',
+    severity: finalTarget.hostname === targetUrl.hostname ? 'PASS' : 'MEDIUM',
+    name: 'Redirect Host Consistency',
+    desc:
+      finalTarget.hostname === targetUrl.hostname
+        ? 'Redirect akhir tetap berada pada host yang sama.'
+        : `Target diarahkan ke host lain: ${finalTarget.hostname}`,
+    penalty: finalTarget.hostname === targetUrl.hostname ? 0 : 5,
+  });
+
+  addCheck(transportCategory, {
+    status: finalTarget.protocol === 'https:' ? 'PASS' : 'FAIL',
+    severity: finalTarget.protocol === 'https:' ? 'PASS' : 'HIGH',
+    name: 'HTTPS Final Transport',
+    desc:
+      finalTarget.protocol === 'https:'
+        ? 'Transport akhir memakai HTTPS.'
+        : 'Target akhir tidak memakai HTTPS.',
+    penalty: finalTarget.protocol === 'https:' ? 0 : 15,
+  });
+
+  addCheck(transportCategory, {
+    status: headers['strict-transport-security'] ? 'PASS' : 'WARN',
+    severity: headers['strict-transport-security'] ? 'PASS' : 'MEDIUM',
+    name: 'Strict-Transport-Security',
+    desc: headers['strict-transport-security']
+      ? `HSTS aktif: ${headers['strict-transport-security']}`
+      : 'Header HSTS tidak ditemukan.',
+    penalty: headers['strict-transport-security'] ? 0 : 5,
+  });
+};
+
 const analyzeContentCategory = (contentCategory, html, finalTarget, headers) => {
   if (!html) {
     addCheck(contentCategory, {
@@ -380,63 +423,13 @@ export async function POST(req) {
     let redirectCount = 0;
     let contentType = '';
     let cookiesSeen = 0;
-    let reachabilityIssue = '';
+    let coverageNote = '';
 
     try {
-      const headerResult = await fetchWithRedirects(targetUrl.toString(), {
-        method: 'HEAD',
-        allowGetFallback: true,
+      const documentResult = await fetchWithRedirects(targetUrl.toString(), {
+        method: 'GET',
+        timeoutMs: DOCUMENT_REQUEST_TIMEOUT_MS,
       });
-
-      finalTarget = new URL(headerResult.finalUrl);
-      headers = Object.fromEntries(headerResult.response.headers.entries());
-      httpStatus = headerResult.response.status;
-      redirectCount = headerResult.redirectCount;
-      contentType = headers['content-type'] || '';
-
-      addCheck(transportCategory, {
-        status: httpStatus >= 200 && httpStatus < 400 ? 'PASS' : httpStatus < 500 ? 'WARN' : 'FAIL',
-        severity: httpStatus >= 200 && httpStatus < 400 ? 'PASS' : httpStatus < 500 ? 'MEDIUM' : 'HIGH',
-        name: 'HTTP Response Status',
-        desc: `Target merespons dengan status HTTP ${httpStatus}.`,
-        penalty: httpStatus >= 200 && httpStatus < 400 ? 0 : httpStatus < 500 ? 6 : 12,
-      });
-
-      addCheck(transportCategory, {
-        status: finalTarget.hostname === targetUrl.hostname ? 'PASS' : 'WARN',
-        severity: finalTarget.hostname === targetUrl.hostname ? 'PASS' : 'MEDIUM',
-        name: 'Redirect Host Consistency',
-        desc:
-          finalTarget.hostname === targetUrl.hostname
-            ? 'Redirect akhir tetap berada pada host yang sama.'
-            : `Target diarahkan ke host lain: ${finalTarget.hostname}`,
-        penalty: finalTarget.hostname === targetUrl.hostname ? 0 : 5,
-      });
-
-      addCheck(transportCategory, {
-        status: finalTarget.protocol === 'https:' ? 'PASS' : 'FAIL',
-        severity: finalTarget.protocol === 'https:' ? 'PASS' : 'HIGH',
-        name: 'HTTPS Final Transport',
-        desc:
-          finalTarget.protocol === 'https:'
-            ? 'Transport akhir memakai HTTPS.'
-            : 'Target akhir tidak memakai HTTPS.',
-        penalty: finalTarget.protocol === 'https:' ? 0 : 15,
-      });
-
-      addCheck(transportCategory, {
-        status: headers['strict-transport-security'] ? 'PASS' : 'WARN',
-        severity: headers['strict-transport-security'] ? 'PASS' : 'MEDIUM',
-        name: 'Strict-Transport-Security',
-        desc: headers['strict-transport-security']
-          ? `HSTS aktif: ${headers['strict-transport-security']}`
-          : 'Header HSTS tidak ditemukan.',
-        penalty: headers['strict-transport-security'] ? 0 : 5,
-      });
-
-      analyzeHeadersCategory(headersCategory, headers);
-
-      const documentResult = await fetchWithRedirects(finalTarget.toString(), { method: 'GET' });
       const documentHeaders = Object.fromEntries(documentResult.response.headers.entries());
       const documentContentType = documentHeaders['content-type'] || '';
       const setCookieHeaders =
@@ -445,11 +438,14 @@ export async function POST(req) {
           : [];
 
       finalTarget = new URL(documentResult.finalUrl);
-      headers = { ...headers, ...documentHeaders };
+      headers = documentHeaders;
       httpStatus = documentResult.response.status;
-      redirectCount = Math.max(redirectCount, documentResult.redirectCount);
-      contentType = documentContentType || contentType;
+      redirectCount = documentResult.redirectCount;
+      contentType = documentContentType;
       cookiesSeen = setCookieHeaders.length;
+
+      analyzeTransportCategory(transportCategory, { httpStatus, finalTarget, targetUrl, headers });
+      analyzeHeadersCategory(headersCategory, headers);
 
       if (documentContentType.includes('text/html')) {
         html = (await documentResult.response.text()).slice(0, HTML_CAPTURE_LIMIT);
@@ -457,41 +453,67 @@ export async function POST(req) {
 
       analyzeExposureCategory(exposureCategory, headers, parseCookies(setCookieHeaders));
       analyzeContentCategory(contentCategory, html, finalTarget, headers);
-    } catch (error) {
-      reachabilityIssue = error instanceof Error ? error.message : 'Target tidak dapat dihubungi.';
-      setCategoryScore(transportCategory, 0);
-      setCategoryScore(headersCategory, 0);
-      setCategoryScore(exposureCategory, 0);
-      setCategoryScore(contentCategory, 0);
+    } catch (documentError) {
+      console.warn('Web scanner document fetch limited:', documentError instanceof Error ? documentError.message : documentError);
 
-      addCheck(transportCategory, {
-        status: 'FAIL',
-        severity: 'HIGH',
-        name: 'Target Reachability',
-        desc: `Backend tidak dapat mengambil response target secara aman: ${reachabilityIssue}.`,
-        penalty: 25,
-      });
+      try {
+        const headerResult = await fetchWithRedirects(targetUrl.toString(), {
+          method: 'HEAD',
+          allowGetFallback: true,
+          timeoutMs: REQUEST_TIMEOUT_MS,
+        });
 
-      addCheck(headersCategory, {
-        status: 'INFO',
-        severity: 'PASS',
-        name: 'Header Analysis',
-        desc: 'Unit header tidak dapat dinilai karena response target tidak tersedia.',
-      });
+        finalTarget = new URL(headerResult.finalUrl);
+        headers = Object.fromEntries(headerResult.response.headers.entries());
+        httpStatus = headerResult.response.status;
+        redirectCount = headerResult.redirectCount;
+        contentType = headers['content-type'] || '';
+        cookiesSeen = 0;
+        coverageNote =
+          'Sebagian unit lanjutan belum tersedia pada target ini. Hasil saat ini difokuskan pada transport, header, dan sinyal dasar yang berhasil dibaca.';
 
-      addCheck(exposureCategory, {
-        status: 'INFO',
-        severity: 'PASS',
-        name: 'Exposure Analysis',
-        desc: 'Unit exposure dan cookie tidak dapat dinilai karena response target tidak tersedia.',
-      });
+        analyzeTransportCategory(transportCategory, { httpStatus, finalTarget, targetUrl, headers });
+        analyzeHeadersCategory(headersCategory, headers);
+        analyzeExposureCategory(exposureCategory, headers, []);
+        analyzeContentCategory(contentCategory, '', finalTarget, headers);
+      } catch (fallbackError) {
+        console.warn('Web scanner target fetch failed:', fallbackError instanceof Error ? fallbackError.message : fallbackError);
 
-      addCheck(contentCategory, {
-        status: 'INFO',
-        severity: 'PASS',
-        name: 'Content Snapshot',
-        desc: 'Snapshot HTML tidak tersedia sehingga analisis konten dilewati.',
-      });
+        setCategoryScore(transportCategory, 0);
+        setCategoryScore(headersCategory, 0);
+        setCategoryScore(exposureCategory, 0);
+        setCategoryScore(contentCategory, 0);
+        coverageNote = 'Target belum dapat dianalisis sepenuhnya saat ini. Coba target legal lain atau ulangi beberapa saat lagi.';
+
+        addCheck(transportCategory, {
+          status: 'FAIL',
+          severity: 'HIGH',
+          name: 'Target Reachability',
+          desc: 'Target belum memberikan response yang cukup untuk analisis lanjutan.',
+          penalty: 25,
+        });
+
+        addCheck(headersCategory, {
+          status: 'INFO',
+          severity: 'PASS',
+          name: 'Header Analysis',
+          desc: 'Unit header belum dapat dinilai pada percobaan ini.',
+        });
+
+        addCheck(exposureCategory, {
+          status: 'INFO',
+          severity: 'PASS',
+          name: 'Exposure Analysis',
+          desc: 'Unit exposure dan cookie belum dapat dinilai pada percobaan ini.',
+        });
+
+        addCheck(contentCategory, {
+          status: 'INFO',
+          severity: 'PASS',
+          name: 'Content Snapshot',
+          desc: 'Snapshot HTML belum tersedia sehingga analisis konten dilewati.',
+        });
+      }
     }
 
     const categories = [
@@ -518,7 +540,7 @@ export async function POST(req) {
     const assessedCategories = categories.filter((category) =>
       category.checks.some((check) => check.status !== 'INFO')
     ).length;
-    const coverageLabel = reachabilityIssue
+    const coverageLabel = coverageNote
       ? `Parsial (${assessedCategories}/${categories.length} unit)`
       : `Penuh (${assessedCategories}/${categories.length} unit)`;
 
@@ -526,8 +548,8 @@ export async function POST(req) {
       target: finalTarget.hostname,
       score,
       grade,
-      summary: reachabilityIssue
-        ? 'Ini adalah passive baseline assessment parsial. Sebagian unit tidak dapat dinilai karena response target tidak tersedia penuh di backend.'
+      summary: coverageNote
+        ? 'Ini adalah passive baseline assessment parsial. Sebagian unit belum tersedia, tetapi hasil utama untuk transport dan header tetap ditampilkan.'
         : 'Ini adalah passive baseline assessment. Scanner tidak melakukan exploit aktif atau verifikasi kerentanan mendalam.',
       methodology: [
         'DNS & Target Validation memeriksa apakah host mengarah ke alamat publik yang aman untuk dipindai.',
@@ -545,7 +567,7 @@ export async function POST(req) {
         cookiesSeen,
         htmlCaptured: Boolean(html),
         coverageLabel,
-        reachabilityIssue,
+        coverageNote,
       },
       categories,
       issues,

@@ -10,33 +10,33 @@ export const scannerPolicy = {
 export const scannerAllowedTargets = [
   {
     hostname: 'demo.owasp-juice.shop',
-    label: 'OWASP Juice Shop Demo',
-    provider: 'OWASP',
-    notes: 'Aplikasi demo modern yang sengaja rentan untuk latihan keamanan aplikasi web.',
+    label: 'Juice Shop',
+    provider: 'OWASP Demo',
+    notes: 'Aplikasi web demo modern untuk latihan keamanan aplikasi secara legal.',
   },
   {
     hostname: 'demo.testfire.net',
-    label: 'Altoro Mutual Demo',
-    provider: 'HCL AppScan Demo',
+    label: 'Altoro Mutual',
+    provider: 'AppScan Demo',
     notes: 'Target demo publik yang sering dipakai untuk validasi scanner dan pembelajaran AppSec.',
   },
   {
     hostname: 'testphp.vulnweb.com',
-    label: 'Invicti PHP Demo',
-    provider: 'Invicti / Acunetix',
-    notes: 'Aplikasi PHP demo yang sengaja disediakan untuk pengujian scanner secara legal.',
+    label: 'Invicti PHP',
+    provider: 'Invicti Demo',
+    notes: 'Aplikasi PHP demo yang disediakan khusus untuk pengujian scanner secara legal.',
   },
   {
     hostname: 'testhtml5.vulnweb.com',
-    label: 'Invicti HTML5 Demo',
-    provider: 'Invicti / Acunetix',
-    notes: 'Target demo publik untuk aplikasi HTML5 yang memang dirancang sebagai bahan uji.',
+    label: 'Invicti HTML5',
+    provider: 'Invicti Demo',
+    notes: 'Target HTML5 demo yang memang dirancang sebagai bahan uji keamanan.',
   },
   {
     hostname: 'zero.webappsecurity.com',
-    label: 'Zero WebAppSecurity Demo',
-    provider: 'Invicti / Acunetix',
-    notes: 'Demo publik yang aman dipakai untuk edukasi security testing dan validasi baseline scanner.',
+    label: 'Zero WebAppSecurity',
+    provider: 'Invicti Demo',
+    notes: 'Demo publik untuk edukasi security testing dan validasi baseline scanner.',
   },
 ];
 
