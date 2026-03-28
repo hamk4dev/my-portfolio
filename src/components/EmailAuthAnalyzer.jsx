@@ -77,20 +77,20 @@ function ResultCard({ title, result }) {
       <p className="mt-4 text-[13px] leading-7 text-slate-200/90">{result.summary}</p>
 
       {result.rawRecord && (
-        <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+        <div className="mt-4 min-w-0 rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
           <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Record yang dinilai</div>
-          <div className="mt-3 overflow-x-auto">
-            <pre className="min-w-max whitespace-pre font-mono text-[11px] leading-6 text-cyan-200">{result.rawRecord}</pre>
+          <div className="mt-3 w-full max-w-full overflow-x-auto">
+            <pre className="inline-block min-w-full whitespace-pre font-mono text-[11px] leading-6 text-cyan-200">{result.rawRecord}</pre>
           </div>
         </div>
       )}
 
       {Array.isArray(result.rawMatches) && result.rawMatches.length > 1 && (
-        <div className="mt-4 space-y-2 rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
+        <div className="mt-4 min-w-0 space-y-2 rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
           <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Record terkait</div>
           {result.rawMatches.map((record, index) => (
-            <div key={`${title}-${index}`} className="overflow-x-auto">
-              <pre className="min-w-max whitespace-pre font-mono text-[11px] leading-6 text-slate-200">
+            <div key={`${title}-${index}`} className="w-full max-w-full overflow-x-auto">
+              <pre className="inline-block min-w-full whitespace-pre font-mono text-[11px] leading-6 text-slate-200">
                 {record}
               </pre>
             </div>
@@ -103,7 +103,7 @@ function ResultCard({ title, result }) {
 
 function RawDnsPanel({ title, query, records }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
+    <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
       <div className="flex items-center gap-2 text-slate-100">
         <Database className="h-4 w-4 text-cyan-300" />
         <div className="text-sm font-semibold">
@@ -119,17 +119,17 @@ function RawDnsPanel({ title, query, records }) {
       </div>
       <div className="mt-3 rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
         <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Query DNS</div>
-        <div className="mt-2 overflow-x-auto">
-          <div className="min-w-max font-mono text-[11px] leading-6 text-cyan-200">{query}</div>
+        <div className="mt-2 w-full max-w-full overflow-x-auto">
+          <div className="inline-block min-w-full font-mono text-[11px] leading-6 text-cyan-200">{query}</div>
         </div>
       </div>
       <div className="mt-3 space-y-3">
         {records.length ? (
           records.map((record, index) => (
-            <div key={`${query}-${index}`} className="rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
+            <div key={`${query}-${index}`} className="min-w-0 rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
               <div className="text-xs uppercase tracking-[0.18em] text-slate-500">TXT #{index + 1}</div>
-              <div className="mt-2 overflow-x-auto">
-                <pre className="min-w-max whitespace-pre font-mono text-[11px] leading-6 text-slate-200">{record}</pre>
+              <div className="mt-2 w-full max-w-full overflow-x-auto">
+                <pre className="inline-block min-w-full whitespace-pre font-mono text-[11px] leading-6 text-slate-200">{record}</pre>
               </div>
             </div>
           ))

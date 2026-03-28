@@ -51,6 +51,7 @@ export default function PortfolioOS() {
   
   const endOfTerminalRef = useRef(null);
   const terminalViewportRef = useRef(null);
+  const previewViewportRef = useRef(null);
   const inputRef = useRef(null);
 
   const queueTerminalScroll = () => {
@@ -99,6 +100,16 @@ export default function PortfolioOS() {
       queueTerminalScroll();
     }
   }, [isGenerating, activeTask]);
+
+  useEffect(() => {
+    const previewViewport = previewViewportRef.current;
+    if (!previewViewport) return;
+
+    previewViewport.scrollTo({
+      top: 0,
+      behavior: 'auto',
+    });
+  }, [selectedNode?.path, selectedNode?.name, currentPath.join('/')]);
 
   useEffect(() => {
     setTime(new Date());
@@ -1042,7 +1053,7 @@ ATURAN SANGAT KETAT:
             </div>
           </div>
 
-          <div className="flex-1 p-4 sm:p-6 overflow-y-auto min-h-0">
+          <div ref={previewViewportRef} className="flex-1 p-4 sm:p-6 overflow-y-auto min-h-0">
             {selectedNode ? (
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 {isAppNode ? (
@@ -1181,23 +1192,24 @@ ATURAN SANGAT KETAT:
 
                 {isBooksDirectory ? (
                   <div className="space-y-5">
+                    {currentPath.length > 0 && (
+                      <div className="flex w-full sm:w-auto sm:justify-end">
+                        <button
+                          onClick={() => handleGuiAction('back')}
+                          className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-300 shadow-sm transition-colors hover:border-slate-600 hover:text-white"
+                        >
+                          <CornerDownLeft className="mr-2 h-4 w-4 shrink-0" />
+                          Kembali
+                        </button>
+                      </div>
+                    )}
+
                     <div className="rounded-2xl border border-slate-800 bg-slate-900/50 px-4 py-4 sm:px-5">
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                      <div className="flex flex-col gap-4">
                         <div className="max-w-3xl space-y-2">
                           <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Koleksi Bacaan</p>
                           <h3 className="text-base sm:text-lg font-semibold text-slate-100">Pilihan buku dan referensi online untuk AI, security, dan engineering.</h3>
                         </div>
-                        {currentPath.length > 0 && (
-                          <div className="flex w-full sm:w-auto sm:justify-end">
-                            <button
-                              onClick={() => handleGuiAction('back')}
-                              className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-300 shadow-sm transition-colors hover:border-slate-600 hover:text-white"
-                            >
-                              <CornerDownLeft className="mr-2 h-4 w-4 shrink-0" />
-                              Kembali
-                            </button>
-                          </div>
-                        )}
                       </div>
                     </div>
 
