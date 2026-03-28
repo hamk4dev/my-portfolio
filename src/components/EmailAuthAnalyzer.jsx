@@ -79,7 +79,9 @@ function ResultCard({ title, result }) {
       {result.rawRecord && (
         <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
           <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Record yang dinilai</div>
-          <pre className="mt-3 whitespace-pre-wrap break-words font-mono text-[11px] leading-7 text-cyan-200">{result.rawRecord}</pre>
+          <div className="mt-3 overflow-x-auto">
+            <pre className="min-w-max whitespace-pre font-mono text-[11px] leading-6 text-cyan-200">{result.rawRecord}</pre>
+          </div>
         </div>
       )}
 
@@ -87,9 +89,11 @@ function ResultCard({ title, result }) {
         <div className="mt-4 space-y-2 rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
           <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Record terkait</div>
           {result.rawMatches.map((record, index) => (
-            <pre key={`${title}-${index}`} className="whitespace-pre-wrap break-words font-mono text-[11px] leading-7 text-slate-200">
-              {record}
-            </pre>
+            <div key={`${title}-${index}`} className="overflow-x-auto">
+              <pre className="min-w-max whitespace-pre font-mono text-[11px] leading-6 text-slate-200">
+                {record}
+              </pre>
+            </div>
           ))}
         </div>
       )}
@@ -102,7 +106,16 @@ function RawDnsPanel({ title, query, records }) {
     <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4">
       <div className="flex items-center gap-2 text-slate-100">
         <Database className="h-4 w-4 text-cyan-300" />
-        <div className="text-sm font-semibold">{title}</div>
+        <div className="text-sm font-semibold">
+          {title === 'SPF / Root TXT' ? (
+            <>
+              <span className="sm:hidden">SPF TXT</span>
+              <span className="hidden sm:inline">{title}</span>
+            </>
+          ) : (
+            title
+          )}
+        </div>
       </div>
       <div className="mt-3 rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
         <div className="text-xs uppercase tracking-[0.18em] text-slate-500">Query DNS</div>

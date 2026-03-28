@@ -1047,20 +1047,32 @@ ATURAN SANGAT KETAT:
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 {isAppNode ? (
                   <div className="space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-slate-700 pb-2 gap-3">
+                    <div className={`flex flex-col sm:flex-row justify-between mb-4 border-b border-slate-700 pb-2 gap-3 ${
+                      isContactApp ? 'sm:items-center' : 'sm:items-end'
+                    }`}>
                       <div className="min-w-0 flex items-center text-emerald-400 text-base sm:text-lg font-medium truncate">
                         <FileText className="w-4 h-4 sm:w-5 sm:h-5 mr-2 shrink-0" />
                         <span className="truncate">{selectedNode.title ?? selectedNode.name}</span>
                       </div>
-                      <div className="flex w-full sm:w-auto justify-end shrink-0">
+                      <div className={`flex w-full sm:w-auto shrink-0 ${isContactApp ? '' : 'sm:justify-end'}`}>
                         <button 
                           onClick={() => {
                             setSelectedNode(null);
                             setAiSummary(null);
                           }}
-                          className="w-full sm:w-auto text-[11px] sm:text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded text-slate-300 transition-colors whitespace-nowrap"
+                          className={isContactApp
+                            ? 'w-full sm:w-auto text-[10px] sm:text-xs bg-slate-800 hover:bg-slate-700 px-2.5 sm:px-3 py-1.5 rounded text-slate-300 transition-colors whitespace-nowrap'
+                            : 'inline-flex w-full sm:w-auto items-center justify-center rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-300 shadow-sm transition-colors hover:border-slate-600 hover:text-white'
+                          }
                         >
-                          Tutup Preview
+                          {isContactApp ? (
+                            'Tutup Preview'
+                          ) : (
+                            <>
+                              <CornerDownLeft className="mr-2 h-4 w-4 shrink-0" />
+                              Kembali
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
@@ -1169,25 +1181,24 @@ ATURAN SANGAT KETAT:
 
                 {isBooksDirectory ? (
                   <div className="space-y-5">
-                    <div className="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/50 px-4 py-4 sm:px-5">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="space-y-1">
-                          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Reading Shelf</p>
-                          <h3 className="text-base sm:text-lg font-semibold text-slate-100">Rak bacaan online untuk pendalaman AI, security, dan engineering.</h3>
+                    <div className="rounded-2xl border border-slate-800 bg-slate-900/50 px-4 py-4 sm:px-5">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                        <div className="max-w-3xl space-y-2">
+                          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Koleksi Bacaan</p>
+                          <h3 className="text-base sm:text-lg font-semibold text-slate-100">Pilihan buku dan referensi online untuk AI, security, dan engineering.</h3>
                         </div>
                         {currentPath.length > 0 && (
-                          <button
-                            onClick={() => handleGuiAction('back')}
-                            className="inline-flex items-center justify-center rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-xs sm:text-sm font-medium text-slate-300 transition-colors hover:border-slate-600 hover:text-white"
-                          >
-                            <CornerDownLeft className="mr-2 h-4 w-4" />
-                            Kembali
-                          </button>
+                          <div className="flex w-full sm:w-auto sm:justify-end">
+                            <button
+                              onClick={() => handleGuiAction('back')}
+                              className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-300 shadow-sm transition-colors hover:border-slate-600 hover:text-white"
+                            >
+                              <CornerDownLeft className="mr-2 h-4 w-4 shrink-0" />
+                              Kembali
+                            </button>
+                          </div>
                         )}
                       </div>
-                      <p className="max-w-3xl text-sm leading-relaxed text-slate-400">
-                        Setiap kartu membuka catatan bacaan dengan ringkasan singkat dan tautan resmi untuk membaca sumbernya secara online.
-                      </p>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -1219,9 +1230,9 @@ ATURAN SANGAT KETAT:
                               {node.summary ?? 'Bacaan online yang dapat dibuka dari panel preview ini.'}
                             </p>
                             <div className="flex items-center justify-between text-xs">
-                              <span className="font-medium text-emerald-300">Buka ringkasan</span>
+                              <span className="font-medium text-emerald-300">Buka bacaan</span>
                               <span className="text-slate-500 transition-colors group-hover:text-slate-300">
-                                {node.type === 'dir' ? 'Masuk folder' : 'Baca sekarang'}
+                                {node.type === 'dir' ? 'Masuk folder' : 'Lihat detail'}
                               </span>
                             </div>
                           </div>

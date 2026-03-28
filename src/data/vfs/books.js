@@ -4,7 +4,12 @@ export const booksDirectory = createDirectory({
   'owasp-testing-guide.md': createFile(
     `# OWASP Web Security Testing Guide
 
-Panduan ini cocok untuk pendalaman metodologi pengujian keamanan web secara terstruktur. Isinya relevan untuk memahami tahapan assessment, information gathering, authentication testing, authorization, configuration review, hingga business logic testing.
+Panduan resmi ini membantu membangun metodologi pengujian keamanan web yang lebih terstruktur, dari tahap pengumpulan informasi sampai validasi business logic.
+
+## Fokus Pembelajaran
+- Alur assessment web yang sistematis
+- Area pengujian seperti authentication, authorization, dan configuration review
+- Cara menyusun checklist security testing yang lebih matang
 
 ## Cocok Untuk
 - Memperkuat fondasi web security testing
@@ -29,7 +34,12 @@ Sumber ini resmi dari OWASP dan sangat relevan untuk eksplorasi security researc
   'security-engineering.md': createFile(
     `# Security Engineering
 
-Buku ini membahas security engineering dari sisi sistem, infrastruktur, desain kontrol, hingga cara berpikir defensif yang lebih matang. Materinya sangat kuat untuk membangun sudut pandang strategis terhadap keamanan informasi.
+Buku ini membahas security engineering dari sudut pandang sistem, infrastruktur, desain kontrol, dan cara berpikir defensif yang lebih matang.
+
+## Fokus Pembelajaran
+- Prinsip desain sistem yang aman
+- Model ancaman dan pendekatan mitigasi
+- Perspektif strategis dalam keamanan informasi
 
 ## Cocok Untuk
 - Memahami security engineering secara lebih mendalam
@@ -54,7 +64,12 @@ Versi online resminya tersedia gratis dari penulis dan sangat bernilai untuk pem
   'linux-command-line.md': createFile(
     `# The Linux Command Line
 
-Buku ini membantu memperkuat pemahaman terminal Linux dari dasar sampai praktik yang lebih produktif. Sangat cocok untuk membangun kebiasaan kerja yang efisien di lingkungan development, server, dan automation.
+Buku ini membantu memperkuat pemahaman terminal Linux dari dasar sampai praktik yang lebih produktif untuk development, server, dan automation.
+
+## Fokus Pembelajaran
+- Dasar command line Linux
+- Workflow terminal yang lebih rapi dan efisien
+- Kebiasaan kerja yang kuat untuk operasional sistem
 
 ## Cocok Untuk
 - Memperdalam command line Linux
@@ -79,7 +94,12 @@ Versi online dan PDF resminya tersedia gratis dari penulis.`,
   'automate-the-boring-stuff.md': createFile(
     `# Automate the Boring Stuff with Python
 
-Buku ini bagus untuk mengasah kemampuan scripting praktis, terutama untuk pekerjaan otomatisasi yang berulang. Relevan untuk membangun utility kecil, parser data, workflow file, dan task otomatis yang mendukung riset maupun operasional teknis.
+Buku ini berfokus pada scripting praktis untuk pekerjaan berulang, mulai dari otomasi file sampai utility kecil yang berguna untuk workflow harian.
+
+## Fokus Pembelajaran
+- Dasar otomasi dengan Python
+- Pembuatan utility kecil untuk tugas berulang
+- Pendekatan praktis untuk meningkatkan produktivitas teknis
 
 ## Cocok Untuk
 - Belajar otomasi dengan Python
@@ -104,7 +124,12 @@ Situs resminya menyediakan versi online yang dapat dibaca langsung.`,
   'web-security-academy.md': createFile(
     `# Web Security Academy
 
-Koleksi materi ini sangat berguna untuk belajar web security secara praktis. Selain penjelasan teknis, tersedia juga lab interaktif yang membantu menghubungkan teori dengan eksploitasi dan validasi nyata dalam lingkungan yang aman.
+Koleksi materi ini membantu mempelajari web security secara praktis melalui penjelasan teknis dan lab interaktif yang aman untuk eksplorasi.
+
+## Fokus Pembelajaran
+- Pemahaman vulnerability web yang lebih aplikatif
+- Hubungan antara teori dan latihan langsung
+- Pendalaman AppSec dan pola eksploitasi umum
 
 ## Cocok Untuk
 - Belajar web vulnerability secara praktis
@@ -129,7 +154,12 @@ Walau formatnya academy, materi ini sangat layak ditempatkan sebagai rak belajar
   'prompt-engineering-guide.md': createFile(
     `# Prompt Engineering Guide
 
-Panduan ini membantu memahami cara merancang prompt yang lebih efektif untuk berbagai use case AI, termasuk reasoning, extraction, classification, coding, dan workflow agentic. Cocok untuk memperluas fondasi dalam pengembangan sistem berbasis AI/LLM.
+Panduan ini membantu memahami cara merancang prompt yang lebih efektif untuk berbagai use case AI, termasuk reasoning, extraction, classification, coding, dan workflow agentic.
+
+## Fokus Pembelajaran
+- Struktur prompt untuk berbagai tugas AI
+- Pola interaksi yang lebih terarah untuk LLM
+- Referensi praktis untuk eksperimen AI dan agentic workflow
 
 ## Cocok Untuk
 - Memperdalam prompt engineering
