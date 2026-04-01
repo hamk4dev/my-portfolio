@@ -937,7 +937,7 @@ ATURAN SANGAT KETAT:
         {!useFocusedToolLayout && (
         <section 
           style={{ flexGrow: splitRatio, flexBasis: 0 }}
-          className="flex flex-col bg-black overflow-hidden font-mono min-w-0 min-h-0"
+          className="portofolio-terminal flex flex-col bg-black overflow-hidden font-mono min-w-0 min-h-0 border-r border-slate-800"
         >
           <div className="flex items-center px-4 py-2 bg-slate-900 border-b border-slate-800 text-xs text-slate-400 uppercase tracking-wider shrink-0">
             <Terminal className="w-4 h-4 mr-2" />

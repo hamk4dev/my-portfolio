@@ -3,49 +3,33 @@
 @tailwind utilities;
 
 :root {
-  --portofolio-bg: #0f0d0b;
-  --portofolio-bg-elevated: #171311;
-  --portofolio-surface-1: rgba(28, 24, 20, 0.94);
-  --portofolio-surface-2: rgba(37, 31, 26, 0.9);
-  --portofolio-surface-3: rgba(49, 42, 36, 0.84);
-  --portofolio-border: rgba(125, 110, 93, 0.28);
-  --portofolio-border-strong: rgba(200, 163, 106, 0.34);
-  --portofolio-text: #f2ebdf;
-  --portofolio-text-soft: #c6b9a8;
-  --portofolio-text-muted: #928678;
-  --portofolio-text-subtle: #73685d;
-  --portofolio-accent: #c8a36a;
-  --portofolio-accent-soft: rgba(200, 163, 106, 0.14);
-  --portofolio-secondary: #90a4a1;
-  --portofolio-secondary-soft: rgba(144, 164, 161, 0.14);
-  --portofolio-warning: #d5aa70;
-  --portofolio-warning-soft: rgba(213, 170, 112, 0.16);
-  --portofolio-danger: #c68477;
-  --portofolio-danger-soft: rgba(198, 132, 119, 0.16);
-  --portofolio-shadow: rgba(0, 0, 0, 0.34);
+  --portofolio-bg: #11100E;
+  --portofolio-surface: #1A1917;
+  --portofolio-hover: #262421;
+  --portofolio-border: #2F2D2A;
+  --portofolio-text-primary: #E0DDD7;
+  --portofolio-text-muted: #8B877E;
+  --portofolio-accent-primary: #C5A365;
+  --portofolio-accent-secondary: #8C9982;
 }
 
 body {
-  background:
-    radial-gradient(circle at top left, rgba(200, 163, 106, 0.12), transparent 35%),
-    radial-gradient(circle at 88% 0%, rgba(144, 164, 161, 0.1), transparent 28%),
-    linear-gradient(180deg, #171311 0%, #0f0d0b 100%);
-  color: var(--portofolio-text-soft);
+  background-color: var(--portofolio-bg);
+  color: var(--portofolio-text-primary);
 }
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
 .portofolio-shell {
-  background:
-    radial-gradient(circle at top, rgba(200, 163, 106, 0.08), transparent 34%),
-    linear-gradient(180deg, rgba(23, 19, 17, 0.98), rgba(15, 13, 11, 1));
-  color: var(--portofolio-text-soft);
+  background-color: var(--portofolio-bg);
+  color: var(--portofolio-text-primary);
 }
 
 .portofolio-header,
@@ -54,247 +38,456 @@ body {
 .portofolio-preview,
 .portofolio-modal-card,
 .portofolio-gate-card,
-.portofolio-notice {
-  border-color: var(--portofolio-border);
-  color: var(--portofolio-text-soft);
+.portofolio-notice,
+.portofolio-preview-bar,
+.portofolio-header-status,
+.portofolio-terminal {
+  background-color: var(--portofolio-surface) !important;
+  border-color: var(--portofolio-border) !important;
+  color: var(--portofolio-text-primary);
+  box-shadow: none !important;
 }
 
-.portofolio-header {
-  background: linear-gradient(180deg, rgba(32, 27, 23, 0.98), rgba(20, 17, 14, 0.96));
-  box-shadow: 0 16px 40px var(--portofolio-shadow), inset 0 -1px 0 rgba(255, 255, 255, 0.03);
-}
-
-.portofolio-brand-mark {
-  color: var(--portofolio-accent);
-}
-
-.portofolio-header-action {
-  background: linear-gradient(180deg, rgba(144, 164, 161, 0.14), rgba(144, 164, 161, 0.08));
-  border-color: rgba(144, 164, 161, 0.26);
-  color: var(--portofolio-secondary);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.portofolio-header-action:hover {
-  background: linear-gradient(180deg, rgba(200, 163, 106, 0.16), rgba(144, 164, 161, 0.12));
-  border-color: rgba(200, 163, 106, 0.3);
-  color: var(--portofolio-text);
-}
-
-.portofolio-header-status {
-  background: rgba(19, 16, 13, 0.78);
-  border-color: var(--portofolio-border);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.portofolio-notice {
-  background: linear-gradient(180deg, rgba(73, 54, 31, 0.24), rgba(36, 28, 20, 0.24));
-}
-
-.portofolio-toolbar {
-  background: rgba(26, 22, 18, 0.95);
-  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.02);
-}
-
-.portofolio-preview {
-  background:
-    radial-gradient(circle at top, rgba(200, 163, 106, 0.08), transparent 34%),
-    linear-gradient(180deg, rgba(27, 23, 20, 0.98), rgba(15, 13, 11, 1));
-}
-
-.portofolio-preview-bar {
-  background: rgba(31, 26, 22, 0.88);
-  border-color: var(--portofolio-border);
-  backdrop-filter: blur(12px);
-  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.02);
+.portofolio-terminal {
+  border-right: 1px solid var(--portofolio-border);
 }
 
 .portofolio-preview-body {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0));
-}
-
-.portofolio-divider {
-  background: rgba(78, 68, 57, 0.86);
-}
-
-.portofolio-divider:hover {
-  background: rgba(108, 93, 78, 0.92);
-}
-
-.portofolio-divider.bg-indigo-500 {
-  background: rgba(200, 163, 106, 0.9);
-}
-
-.portofolio-divider > div > div {
-  background-color: rgba(198, 185, 168, 0.52);
-}
-
-.portofolio-footer {
-  background: linear-gradient(180deg, rgba(26, 22, 18, 0.96), rgba(17, 14, 12, 0.98));
-  box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.18);
+  background-color: var(--portofolio-bg);
 }
 
 .portofolio-modal-overlay {
-  background: rgba(10, 8, 7, 0.78);
+  background-color: var(--portofolio-bg);
 }
 
-.portofolio-modal-card,
-.portofolio-gate-card {
-  background:
-    radial-gradient(circle at top, rgba(200, 163, 106, 0.08), transparent 38%),
-    linear-gradient(180deg, rgba(30, 25, 21, 0.98), rgba(18, 15, 13, 1));
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+.portofolio-divider,
+.portofolio-divider:hover,
+.portofolio-divider.bg-indigo-500 {
+  background-color: var(--portofolio-border) !important;
 }
 
-.portofolio-surface-theme :is(.bg-slate-950, .bg-slate-950\/80, .bg-slate-950\/70, .bg-slate-950\/60, .bg-black\/50, .bg-black\/20) {
-  background-color: rgba(24, 20, 17, 0.88);
+.portofolio-divider > div > div {
+  background-color: var(--portofolio-text-muted) !important;
 }
 
-.portofolio-surface-theme :is(.bg-slate-900, .bg-slate-900\/80, .bg-slate-900\/70, .bg-slate-900\/60, .bg-slate-900\/50, .bg-slate-900\/40) {
-  background-color: var(--portofolio-surface-2);
+.portofolio-brand-mark {
+  color: var(--portofolio-accent-primary);
 }
 
-.portofolio-surface-theme :is(.bg-slate-800, .bg-slate-800\/80, .bg-slate-800\/50, .bg-slate-800\/30) {
-  background-color: var(--portofolio-surface-3);
+.portofolio-header-action {
+  background-color: var(--portofolio-surface) !important;
+  border-color: var(--portofolio-border) !important;
+  color: var(--portofolio-accent-primary) !important;
 }
 
-.portofolio-surface-theme :is(.border-slate-800, .border-slate-700, .border-slate-700\/80, .border-slate-700\/60, .border-slate-600, .border-white\/10) {
-  border-color: var(--portofolio-border);
+.portofolio-header-action:hover {
+  background-color: var(--portofolio-hover) !important;
+  color: var(--portofolio-text-primary) !important;
 }
 
-.portofolio-surface-theme :is(.text-slate-100, .text-slate-200, .text-white) {
-  color: var(--portofolio-text);
+.portofolio-shell :is(
+  [class^='bg-gradient-to-'],
+  [class*=' bg-gradient-to-']
+) {
+  background-image: none !important;
+  background-color: var(--portofolio-surface) !important;
 }
 
-.portofolio-surface-theme :is(.text-slate-300, .text-slate-200\/90, .text-slate-200\/80) {
-  color: var(--portofolio-text-soft);
+.portofolio-shell :is(
+  [class^='bg-black'],
+  [class*=' bg-black'],
+  [class^='bg-slate-'],
+  [class*=' bg-slate-'],
+  [class^='bg-gray-'],
+  [class*=' bg-gray-'],
+  [class^='bg-zinc-'],
+  [class*=' bg-zinc-'],
+  [class^='bg-neutral-'],
+  [class*=' bg-neutral-'],
+  [class^='bg-stone-'],
+  [class*=' bg-stone-']
+) {
+  background-color: var(--portofolio-surface) !important;
 }
 
-.portofolio-surface-theme :is(.text-slate-400, .text-slate-500, .text-slate-200\/70, .text-slate-100\/70) {
+.portofolio-shell :is(
+  [class^='bg-emerald-'],
+  [class*=' bg-emerald-'],
+  [class^='bg-green-'],
+  [class*=' bg-green-'],
+  [class^='bg-teal-'],
+  [class*=' bg-teal-'],
+  [class^='bg-blue-'],
+  [class*=' bg-blue-'],
+  [class^='bg-sky-'],
+  [class*=' bg-sky-']
+) {
+  background-color: var(--portofolio-accent-secondary) !important;
+}
+
+.portofolio-shell :is(
+  [class^='bg-cyan-'],
+  [class*=' bg-cyan-'],
+  [class^='bg-indigo-'],
+  [class*=' bg-indigo-'],
+  [class^='bg-violet-'],
+  [class*=' bg-violet-'],
+  [class^='bg-purple-'],
+  [class*=' bg-purple-'],
+  [class^='bg-fuchsia-'],
+  [class*=' bg-fuchsia-'],
+  [class^='bg-pink-'],
+  [class*=' bg-pink-'],
+  [class^='bg-rose-'],
+  [class*=' bg-rose-'],
+  [class^='bg-amber-'],
+  [class*=' bg-amber-'],
+  [class^='bg-orange-'],
+  [class*=' bg-orange-'],
+  [class^='bg-red-'],
+  [class*=' bg-red-'],
+  [class^='bg-yellow-'],
+  [class*=' bg-yellow-']
+) {
+  background-color: var(--portofolio-accent-primary) !important;
+}
+
+.portofolio-shell :is(
+  [class^='text-white'],
+  [class*=' text-white'],
+  [class^='text-slate-1'],
+  [class*=' text-slate-1'],
+  [class^='text-slate-2'],
+  [class*=' text-slate-2'],
+  [class^='text-slate-3'],
+  [class*=' text-slate-3'],
+  [class^='text-primary'],
+  [class*=' text-primary']
+) {
+  color: var(--portofolio-text-primary) !important;
+}
+
+.portofolio-shell :is(
+  [class^='text-slate-4'],
+  [class*=' text-slate-4'],
+  [class^='text-slate-5'],
+  [class*=' text-slate-5'],
+  [class^='text-slate-6'],
+  [class*=' text-slate-6'],
+  [class^='text-muted'],
+  [class*=' text-muted']
+) {
+  color: var(--portofolio-text-muted) !important;
+}
+
+.portofolio-shell :is(
+  [class^='text-emerald-'],
+  [class*=' text-emerald-'],
+  [class^='text-green-'],
+  [class*=' text-green-'],
+  [class^='text-teal-'],
+  [class*=' text-teal-'],
+  [class^='text-blue-'],
+  [class*=' text-blue-'],
+  [class^='text-sky-'],
+  [class*=' text-sky-']
+) {
+  color: var(--portofolio-accent-secondary) !important;
+}
+
+.portofolio-shell :is(
+  [class^='text-cyan-'],
+  [class*=' text-cyan-'],
+  [class^='text-indigo-'],
+  [class*=' text-indigo-'],
+  [class^='text-violet-'],
+  [class*=' text-violet-'],
+  [class^='text-purple-'],
+  [class*=' text-purple-'],
+  [class^='text-fuchsia-'],
+  [class*=' text-fuchsia-'],
+  [class^='text-pink-'],
+  [class*=' text-pink-'],
+  [class^='text-rose-'],
+  [class*=' text-rose-'],
+  [class^='text-amber-'],
+  [class*=' text-amber-'],
+  [class^='text-orange-'],
+  [class*=' text-orange-'],
+  [class^='text-red-'],
+  [class*=' text-red-'],
+  [class^='text-yellow-'],
+  [class*=' text-yellow-']
+) {
+  color: var(--portofolio-accent-primary) !important;
+}
+
+.portofolio-shell :is(
+  .border,
+  .border-t,
+  .border-b,
+  .border-l,
+  .border-r,
+  [class^='border-slate-'],
+  [class*=' border-slate-'],
+  [class^='border-gray-'],
+  [class*=' border-gray-'],
+  [class^='border-zinc-'],
+  [class*=' border-zinc-'],
+  [class^='border-neutral-'],
+  [class*=' border-neutral-'],
+  [class^='border-stone-'],
+  [class*=' border-stone-'],
+  [class^='border-white'],
+  [class*=' border-white'],
+  [class^='border-black'],
+  [class*=' border-black'],
+  [class^='border-transparent'],
+  [class*=' border-transparent']
+) {
+  border-color: var(--portofolio-border) !important;
+}
+
+.portofolio-shell :is(
+  [class^='border-emerald-'],
+  [class*=' border-emerald-'],
+  [class^='border-green-'],
+  [class*=' border-green-'],
+  [class^='border-teal-'],
+  [class*=' border-teal-'],
+  [class^='border-blue-'],
+  [class*=' border-blue-'],
+  [class^='border-sky-'],
+  [class*=' border-sky-']
+) {
+  border-color: var(--portofolio-accent-secondary) !important;
+}
+
+.portofolio-shell :is(
+  [class^='border-cyan-'],
+  [class*=' border-cyan-'],
+  [class^='border-indigo-'],
+  [class*=' border-indigo-'],
+  [class^='border-violet-'],
+  [class*=' border-violet-'],
+  [class^='border-purple-'],
+  [class*=' border-purple-'],
+  [class^='border-fuchsia-'],
+  [class*=' border-fuchsia-'],
+  [class^='border-pink-'],
+  [class*=' border-pink-'],
+  [class^='border-rose-'],
+  [class*=' border-rose-'],
+  [class^='border-amber-'],
+  [class*=' border-amber-'],
+  [class^='border-orange-'],
+  [class*=' border-orange-'],
+  [class^='border-red-'],
+  [class*=' border-red-'],
+  [class^='border-yellow-'],
+  [class*=' border-yellow-']
+) {
+  border-color: var(--portofolio-accent-primary) !important;
+}
+
+.portofolio-shell :is(
+  [class^='hover:bg-'],
+  [class*=' hover:bg-']
+):hover {
+  background-color: var(--portofolio-hover) !important;
+}
+
+.portofolio-shell :is(
+  [class^='hover:text-slate-'],
+  [class*=' hover:text-slate-'],
+  [class^='hover:text-white'],
+  [class*=' hover:text-white']
+):hover {
+  color: var(--portofolio-text-primary) !important;
+}
+
+.portofolio-shell :is(
+  [class^='hover:text-emerald-'],
+  [class*=' hover:text-emerald-'],
+  [class^='hover:text-green-'],
+  [class*=' hover:text-green-'],
+  [class^='hover:text-teal-'],
+  [class*=' hover:text-teal-'],
+  [class^='hover:text-blue-'],
+  [class*=' hover:text-blue-'],
+  [class^='hover:text-sky-'],
+  [class*=' hover:text-sky-']
+):hover {
+  color: var(--portofolio-accent-secondary) !important;
+}
+
+.portofolio-shell :is(
+  [class^='hover:text-cyan-'],
+  [class*=' hover:text-cyan-'],
+  [class^='hover:text-indigo-'],
+  [class*=' hover:text-indigo-'],
+  [class^='hover:text-violet-'],
+  [class*=' hover:text-violet-'],
+  [class^='hover:text-purple-'],
+  [class*=' hover:text-purple-'],
+  [class^='hover:text-fuchsia-'],
+  [class*=' hover:text-fuchsia-'],
+  [class^='hover:text-pink-'],
+  [class*=' hover:text-pink-'],
+  [class^='hover:text-rose-'],
+  [class*=' hover:text-rose-'],
+  [class^='hover:text-amber-'],
+  [class*=' hover:text-amber-'],
+  [class^='hover:text-orange-'],
+  [class*=' hover:text-orange-'],
+  [class^='hover:text-red-'],
+  [class*=' hover:text-red-'],
+  [class^='hover:text-yellow-'],
+  [class*=' hover:text-yellow-']
+):hover {
+  color: var(--portofolio-accent-primary) !important;
+}
+
+.portofolio-shell .group:hover :is(
+  [class^='group-hover:text-slate-'],
+  [class*=' group-hover:text-slate-'],
+  [class^='group-hover:text-white'],
+  [class*=' group-hover:text-white']
+) {
+  color: var(--portofolio-text-primary) !important;
+}
+
+.portofolio-shell .group:hover :is(
+  [class^='group-hover:text-emerald-'],
+  [class*=' group-hover:text-emerald-'],
+  [class^='group-hover:text-green-'],
+  [class*=' group-hover:text-green-'],
+  [class^='group-hover:text-teal-'],
+  [class*=' group-hover:text-teal-'],
+  [class^='group-hover:text-blue-'],
+  [class*=' group-hover:text-blue-'],
+  [class^='group-hover:text-sky-'],
+  [class*=' group-hover:text-sky-']
+) {
+  color: var(--portofolio-accent-secondary) !important;
+}
+
+.portofolio-shell .group:hover :is(
+  [class^='group-hover:text-cyan-'],
+  [class*=' group-hover:text-cyan-'],
+  [class^='group-hover:text-indigo-'],
+  [class*=' group-hover:text-indigo-'],
+  [class^='group-hover:text-violet-'],
+  [class*=' group-hover:text-violet-'],
+  [class^='group-hover:text-purple-'],
+  [class*=' group-hover:text-purple-'],
+  [class^='group-hover:text-fuchsia-'],
+  [class*=' group-hover:text-fuchsia-'],
+  [class^='group-hover:text-pink-'],
+  [class*=' group-hover:text-pink-'],
+  [class^='group-hover:text-rose-'],
+  [class*=' group-hover:text-rose-'],
+  [class^='group-hover:text-amber-'],
+  [class*=' group-hover:text-amber-'],
+  [class^='group-hover:text-orange-'],
+  [class*=' group-hover:text-orange-'],
+  [class^='group-hover:text-red-'],
+  [class*=' group-hover:text-red-'],
+  [class^='group-hover:text-yellow-'],
+  [class*=' group-hover:text-yellow-']
+) {
+  color: var(--portofolio-accent-primary) !important;
+}
+
+.portofolio-shell :is(
+  [class^='hover:border-'],
+  [class*=' hover:border-']
+):hover {
+  border-color: var(--portofolio-border) !important;
+}
+
+.portofolio-shell :is(
+  [class^='decoration-'],
+  [class*=' decoration-']
+) {
+  text-decoration-color: var(--portofolio-accent-secondary) !important;
+}
+
+.portofolio-shell :is(
+  [class^='ring-'],
+  [class*=' ring-']
+) {
+  --tw-ring-color: var(--portofolio-accent-primary) !important;
+}
+
+.portofolio-shell :is(
+  [class^='focus:ring-'],
+  [class*=' focus:ring-']
+):focus {
+  --tw-ring-color: var(--portofolio-accent-primary) !important;
+  box-shadow: none !important;
+}
+
+.portofolio-shell :is(
+  .shadow,
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg,
+  .shadow-xl,
+  .shadow-2xl,
+  .shadow-inner,
+  [class^="shadow-["],
+  [class*=" shadow-["]
+) {
+  box-shadow: none !important;
+}
+
+.portofolio-shell :is(
+  .rounded-full,
+  .rounded-3xl,
+  .rounded-2xl,
+  .rounded-xl,
+  .rounded-lg,
+  .rounded-md,
+  .rounded-sm,
+  .rounded
+) {
+  border-radius: 8px !important;
+}
+
+.portofolio-shell :is(
+  section,
+  article,
+  aside,
+  [class^='rounded-3xl'][class*='bg-'],
+  [class*=' rounded-3xl'][class*='bg-'],
+  [class^='rounded-2xl'][class*='bg-'],
+  [class*=' rounded-2xl'][class*='bg-'],
+  [class^='rounded-xl'][class*='bg-'],
+  [class*=' rounded-xl'][class*='bg-'],
+  [class^='rounded-lg'][class*='bg-'],
+  [class*=' rounded-lg'][class*='bg-'],
+  [class^='rounded-md'][class*='bg-'],
+  [class*=' rounded-md'][class*='bg-']
+) {
+  border-width: 1px !important;
+  border-style: solid !important;
+  border-color: var(--portofolio-border) !important;
+}
+
+.portofolio-shell :is(input:not([type='hidden']), textarea, select) {
+  background-color: var(--portofolio-surface) !important;
+  border: 1px solid var(--portofolio-border) !important;
+  color: var(--portofolio-text-primary) !important;
+  border-radius: 8px !important;
+}
+
+.portofolio-shell :is(input:not([type='hidden']), textarea, select)::placeholder {
   color: var(--portofolio-text-muted);
 }
 
-.portofolio-surface-theme .text-slate-600 {
-  color: var(--portofolio-text-subtle);
-}
-
-.portofolio-surface-theme :is(.text-emerald-100, .text-emerald-200, .text-emerald-300, .text-emerald-400) {
-  color: var(--portofolio-accent);
-}
-
-.portofolio-surface-theme :is(.border-emerald-500\/20, .border-emerald-500\/30, .border-emerald-500\/40, .border-emerald-500\/60, .border-amber-400\/30) {
-  border-color: rgba(200, 163, 106, 0.32);
-}
-
-.portofolio-surface-theme :is(.bg-emerald-500\/10, .bg-emerald-500\/20, .bg-emerald-950\/30) {
-  background-color: var(--portofolio-accent-soft);
-}
-
-.portofolio-surface-theme :is(.bg-emerald-500, .bg-indigo-600) {
-  background-color: var(--portofolio-accent);
-}
-
-.portofolio-surface-theme :is(.text-blue-200, .text-blue-300, .text-blue-400, .text-cyan-100\/85, .text-cyan-200, .text-cyan-300, .text-indigo-100\/80, .text-indigo-300, .text-indigo-400) {
-  color: var(--portofolio-secondary);
-}
-
-.portofolio-surface-theme :is(.border-blue-500\/30, .border-cyan-500\/20, .border-cyan-500\/30, .border-indigo-500\/30) {
-  border-color: rgba(144, 164, 161, 0.32);
-}
-
-.portofolio-surface-theme :is(.bg-blue-500\/10, .bg-blue-500\/20, .bg-cyan-500\/10, .bg-cyan-500\/20, .bg-cyan-950\/20, .bg-indigo-500\/10, .bg-indigo-500\/20, .bg-indigo-500\/40, .bg-indigo-950\/40) {
-  background-color: var(--portofolio-secondary-soft);
-}
-
-.portofolio-surface-theme :is(.text-amber-100, .text-amber-100\/85, .text-amber-100\/90, .text-amber-200, .text-amber-300, .text-orange-200, .text-orange-300) {
-  color: var(--portofolio-warning);
-}
-
-.portofolio-surface-theme :is(.border-amber-500\/20, .border-amber-500\/30, .border-orange-500\/30, .border-orange-500\/40) {
-  border-color: rgba(213, 170, 112, 0.32);
-}
-
-.portofolio-surface-theme :is(.bg-amber-950\/20, .bg-amber-950\/30, .bg-amber-500\/10, .bg-amber-500\/20, .bg-orange-950\/30, .bg-orange-500\/10) {
-  background-color: var(--portofolio-warning-soft);
-}
-
-.portofolio-surface-theme :is(.text-red-100, .text-red-200, .text-red-300, .text-red-400) {
-  color: var(--portofolio-danger);
-}
-
-.portofolio-surface-theme :is(.border-red-500\/30, .border-red-500\/40) {
-  border-color: rgba(198, 132, 119, 0.34);
-}
-
-.portofolio-surface-theme :is(.bg-red-950\/30, .bg-red-500\/10) {
-  background-color: var(--portofolio-danger-soft);
-}
-
-.portofolio-surface-theme :is(.hover\:bg-slate-900:hover, .hover\:bg-slate-800:hover, .hover\:bg-slate-700:hover) {
-  background-color: rgba(58, 49, 42, 0.88);
-}
-
-.portofolio-surface-theme :is(.hover\:border-slate-700:hover, .hover\:border-slate-600:hover, .hover\:border-emerald-500\/30:hover, .hover\:border-blue-500\/30:hover, .hover\:border-cyan-500\/30:hover, .hover\:border-indigo-500\/30:hover) {
-  border-color: var(--portofolio-border-strong);
-}
-
-.portofolio-surface-theme :is(.hover\:text-white:hover, .hover\:text-slate-200:hover, .hover\:text-slate-300:hover) {
-  color: var(--portofolio-text);
-}
-
-.portofolio-surface-theme :is(.hover\:text-emerald-300:hover, .hover\:text-cyan-300:hover) {
-  color: var(--portofolio-accent);
-}
-
-.portofolio-surface-theme :is(.hover\:bg-emerald-500\/20:hover, .hover\:bg-blue-500\/20:hover, .hover\:bg-cyan-500\/20:hover, .hover\:bg-indigo-500\/20:hover, .hover\:bg-indigo-500\/40:hover) {
-  background-color: rgba(200, 163, 106, 0.18);
-}
-
-.portofolio-surface-theme :is(.hover\:bg-indigo-500:hover) {
-  background-color: rgba(216, 180, 121, 0.92);
-}
-
-.portofolio-surface-theme .group:hover :is(.group-hover\:bg-slate-700, .group-hover\:bg-slate-800) {
-  background-color: rgba(58, 49, 42, 0.88);
-}
-
-.portofolio-surface-theme .group:hover :is(.group-hover\:text-slate-200, .group-hover\:text-slate-300, .group-hover\:text-white) {
-  color: var(--portofolio-text);
-}
-
-.portofolio-surface-theme .group:hover :is(.group-hover\:bg-blue-500\/20, .group-hover\:bg-emerald-500\/20) {
-  background-color: rgba(200, 163, 106, 0.18);
-}
-
-.portofolio-surface-theme :is(input:not([type='hidden']), textarea) {
-  background-color: rgba(20, 17, 14, 0.92);
-  border-color: var(--portofolio-border);
-  color: var(--portofolio-text);
-}
-
-.portofolio-surface-theme :is(input:not([type='hidden']), textarea)::placeholder {
-  color: var(--portofolio-text-muted);
-}
-
-.portofolio-surface-theme :is(input:not([type='hidden']), textarea):focus {
-  border-color: rgba(200, 163, 106, 0.55);
-  box-shadow: 0 0 0 1px rgba(200, 163, 106, 0.22), 0 0 0 4px rgba(200, 163, 106, 0.1);
-}
-
-.portofolio-preview :is(.from-emerald-500\/20, .from-sky-500\/20, .from-amber-500\/20, .from-violet-500\/20, .from-rose-500\/20, .from-cyan-500\/20) {
-  --tw-gradient-from: rgba(200, 163, 106, 0.24) var(--tw-gradient-from-position);
-  --tw-gradient-to: rgba(200, 163, 106, 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-}
-
-.portofolio-preview .via-slate-900 {
-  --tw-gradient-stops: var(--tw-gradient-from), rgba(32, 27, 23, 0.9) var(--tw-gradient-via-position), var(--tw-gradient-to);
-}
-
-.portofolio-preview .to-slate-950 {
-  --tw-gradient-to: rgba(15, 13, 11, 1) var(--tw-gradient-to-position);
-}
-
-.portofolio-preview :is(.border-sky-500\/30, .border-violet-500\/30, .border-rose-500\/30, .border-cyan-500\/30) {
-  border-color: rgba(200, 163, 106, 0.28);
+.portofolio-shell :is(input:not([type='hidden']), textarea, select):focus {
+  border-color: var(--portofolio-accent-primary) !important;
+  box-shadow: none !important;
+  outline: none !important;
 }

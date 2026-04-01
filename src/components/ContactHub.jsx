@@ -153,7 +153,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
           </div>
 
           <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
-            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Peta</div>
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Lokasi</div>
             <div className="mt-4 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/80">
               {showInlineMap ? (
                 <iframe
@@ -164,7 +164,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
                   className="h-[280px] w-full border-0 sm:h-[340px] xl:h-[360px]"
                 />
               ) : (
-                <div className="flex h-[280px] w-full flex-col justify-between bg-[radial-gradient(circle_at_top,_rgba(200,163,106,0.16),_transparent_52%),linear-gradient(180deg,_rgba(37,31,26,0.98),_rgba(17,14,12,1))] p-5 sm:h-[340px] sm:p-6 xl:h-[360px]">
+                <div className="flex h-[280px] w-full flex-col justify-between bg-slate-950 p-5 sm:h-[340px] sm:p-6 xl:h-[360px]">
                   <div className="min-w-0">
                     <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
                       Peta
