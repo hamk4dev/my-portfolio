@@ -986,7 +986,7 @@ ATURAN SANGAT KETAT:
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="flex-1 w-full bg-transparent outline-none border-none text-slate-200 min-w-0"
+                  className="portofolio-cli-input flex-1 w-full bg-transparent outline-none border-none text-slate-200 min-w-0"
                   autoComplete="off"
                   autoCorrect="off"
                   spellCheck="false"

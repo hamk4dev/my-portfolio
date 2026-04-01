@@ -384,19 +384,37 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
 }
 
-.portofolio-theme :is(input:not([type='hidden']), textarea, select) {
+.portofolio-theme :is(input:not([type='hidden']):not(.portofolio-cli-input), textarea, select) {
   background-color: rgba(21, 18, 16, 0.84) !important;
   border-color: var(--portofolio-border) !important;
   color: var(--portofolio-text-primary) !important;
 }
 
-.portofolio-theme :is(input:not([type='hidden']), textarea, select)::placeholder {
+.portofolio-theme :is(input:not([type='hidden']):not(.portofolio-cli-input), textarea, select)::placeholder {
   color: var(--portofolio-text-muted);
 }
 
-.portofolio-theme :is(input:not([type='hidden']), textarea, select):focus {
+.portofolio-theme :is(input:not([type='hidden']):not(.portofolio-cli-input), textarea, select):focus {
   border-color: rgba(214, 181, 129, 0.52) !important;
   box-shadow: 0 0 0 1px rgba(214, 181, 129, 0.26), 0 0 0 4px rgba(214, 181, 129, 0.08) !important;
+}
+
+.portofolio-theme .portofolio-cli-input {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--portofolio-text-primary) !important;
+  caret-color: var(--portofolio-accent-primary);
+}
+
+.portofolio-theme .portofolio-cli-input:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.portofolio-theme iframe[title='Lokasi Kontak'] {
+  filter: saturate(0.58) hue-rotate(-18deg) brightness(0.9) contrast(0.93);
 }
 
 .portofolio-theme :is(.decoration-blue-500\/30, .decoration-emerald-500\/30) {
