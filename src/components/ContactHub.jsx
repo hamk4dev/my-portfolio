@@ -164,7 +164,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
                   className="h-[280px] w-full border-0 sm:h-[340px] xl:h-[360px]"
                 />
               ) : (
-                <div className="flex h-[280px] w-full flex-col justify-between bg-[radial-gradient(circle_at_top,_rgba(200,163,106,0.16),_transparent_52%),linear-gradient(180deg,_rgba(37,31,26,0.98),_rgba(17,14,12,1))] p-5 sm:h-[340px] sm:p-6 xl:h-[360px]">
+                <div className="flex h-[280px] w-full flex-col justify-between bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_55%),linear-gradient(180deg,_rgba(15,23,42,0.96),_rgba(2,6,23,1))] p-5 sm:h-[340px] sm:p-6 xl:h-[360px]">
                   <div className="min-w-0">
                     <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
                       Peta
@@ -303,3 +303,4 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
     </div>
   );
 }
+

@@ -178,8 +178,8 @@ export default function GlobalTurnstileGate({ onVerified, onAccessStateChange, r
   if (verified || limitedMode) return null;
 
   return (
-    <div className="portofolio-modal-overlay portofolio-gate fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/95 p-4 backdrop-blur-md">
-      <div className="portofolio-surface-theme portofolio-gate-card w-full max-w-lg rounded-3xl border border-slate-800 bg-slate-950 p-6 shadow-2xl sm:p-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/95 p-4 backdrop-blur-md">
+      <div className="w-full max-w-lg rounded-3xl border border-slate-800 bg-slate-950 p-6 shadow-2xl sm:p-8">
         <div className="flex items-start gap-4">
           <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 p-3 text-emerald-300">
             <ShieldCheck className="h-6 w-6" />
