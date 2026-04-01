@@ -1,8 +1,8 @@
-const globalStore = globalThis.__portfolioRateLimitStore ?? new Map();
+const globalStore = globalThis.__portofolioRateLimitStore ?? new Map();
 const UPSTASH_TIMEOUT_MS = 5000;
 
-if (!globalThis.__portfolioRateLimitStore) {
-  globalThis.__portfolioRateLimitStore = globalStore;
+if (!globalThis.__portofolioRateLimitStore) {
+  globalThis.__portofolioRateLimitStore = globalStore;
 }
 
 function getUpstashConfig() {

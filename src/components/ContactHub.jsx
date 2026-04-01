@@ -78,7 +78,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
           <div className="min-w-0">
             <h3 className="text-lg font-semibold text-slate-100">Kontak</h3>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
-              Pilih jalur kontak yang paling sesuai untuk Anda.
+              Hubungi saya untuk kolaborasi proyek, konsultasi, atau peluang kerja profesional.
             </p>
           </div>
         </div>
@@ -92,9 +92,9 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
               <Mail className="h-4 w-4" />
               <span className="text-xs font-semibold uppercase tracking-[0.18em]">Email</span>
             </div>
-            <div className="mt-4 text-base font-semibold text-slate-100">Email-ku</div>
+            <div className="mt-4 text-base font-semibold text-slate-100">Email</div>
             <div className="mt-2 break-words text-sm leading-relaxed text-slate-400">
-              Buka jalur email langsung untuk percakapan profesional.
+              {contactInfo.email}
             </div>
           </a>
 
@@ -110,7 +110,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
             </div>
             <div className="mt-4 text-base font-semibold text-slate-100">hamk4dev</div>
             <div className="mt-2 break-words text-sm leading-relaxed text-slate-400">
-              Lihat repo, eksperimen, dan proyek yang sudah dipublikasikan.
+              Lihat repo saya, eksperimen, dan proyek yang sudah dipublikasikan.
             </div>
           </a>
         </div>
@@ -135,9 +135,11 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
             <div className="mt-3 break-words text-base font-semibold leading-relaxed text-slate-100">
               {contactInfo.locationName}
             </div>
-            <div className="mt-2 break-words text-sm leading-relaxed text-slate-400">
-              {contactInfo.addressLine}
-            </div>
+            {contactInfo.addressLine ? (
+              <div className="mt-2 break-words text-sm leading-relaxed text-slate-400">
+                {contactInfo.addressLine}
+              </div>
+            ) : null}
 
             <a
               href={contactInfo.mapUrl}
@@ -162,18 +164,18 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
                   className="h-[280px] w-full border-0 sm:h-[340px] xl:h-[360px]"
                 />
               ) : (
-                <div className="flex h-[280px] w-full flex-col justify-between bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_55%),linear-gradient(180deg,_rgba(15,23,42,0.96),_rgba(2,6,23,1))] p-5 sm:h-[340px] sm:p-6 xl:h-[360px]">
+                <div className="flex h-[280px] w-full flex-col justify-between bg-[radial-gradient(circle_at_top,_rgba(200,163,106,0.16),_transparent_52%),linear-gradient(180deg,_rgba(37,31,26,0.98),_rgba(17,14,12,1))] p-5 sm:h-[340px] sm:p-6 xl:h-[360px]">
                   <div className="min-w-0">
                     <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
                       Peta
                     </div>
                     <h4 className="mt-4 text-lg font-semibold text-slate-100">Tampilkan peta</h4>
                     <p className="mt-3 max-w-md text-sm leading-relaxed text-slate-400">
-                      Peta dapat dimuat langsung di panel ini atau dibuka di tab terpisah.
+                      Lokasi domisili portofolio ini berada di Ulu Baula, Baula, Kolaka, Sulawesi Tenggara.
                     </p>
                   </div>
 
-                  <div className="space-y-3">
+                  <div>
                     <button
                       type="button"
                       onClick={() => setShowInlineMap(true)}
@@ -182,9 +184,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
                       <MapPin className="h-4 w-4" />
                       Tampilkan Peta
                     </button>
-                    <div className="text-xs leading-relaxed text-slate-500">
-                      Anda juga bisa memakai tombol Maps pada box alamat.
-                    </div>
+
                   </div>
                 </div>
               )}
@@ -201,7 +201,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
           <div className="min-w-0">
             <h3 className="text-lg font-semibold text-slate-100">Kirim Pesan</h3>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
-              Sampaikan pesan singkat melalui form di bawah ini.
+              Kirim pesan untuk kebutuhan kolaborasi, proyek, atau peluang kerja.
             </p>
           </div>
         </div>

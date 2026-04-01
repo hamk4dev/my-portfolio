@@ -7,8 +7,8 @@ export const projectsDirectory = createDirectory({
   'web-perpustakaan.md': createFile(
     `# Website Perpustakaan (Prototype)\n\nPengembangan sistem informasi perpustakaan sederhana sebagai sarana pembelajaran mandiri di bidang pengembangan web.`
   ),
-  'portfolio-web.md': createFile(
-    `# Pengembangan Website dan Portfolio\n\nPembuatan berbagai website sebagai media eksplorasi dan peningkatan kompetensi teknis (Eksperimen Mandiri), termasuk sistem Init.CV ini.`
+  'portofolio-web.md': createFile(
+    `# Pengembangan Website dan Portofolio\n\nPembuatan berbagai website sebagai media eksplorasi dan peningkatan kompetensi teknis (Eksperimen Mandiri), termasuk sistem Init.CV ini.`
   ),
   'recycle-center.md': createFile(
     `# Aplikasi Desktop Recycle Center\n\nPerancangan sistem pengelolaan data untuk mendukung operasional pusat daur ulang (dalam tahap pengembangan konsep).`

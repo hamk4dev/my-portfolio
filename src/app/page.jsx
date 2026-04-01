@@ -17,7 +17,7 @@ import {
   getSystemHealthOnBackend,
 } from '@/services/api';
 
-export default function PortfolioOS() {
+export default function PortofolioOS() {
   const vfs = initialVFS;
   const [currentPath, setCurrentPath] = useState([]);
   const [selectedNode, setSelectedNode] = useState(null);
@@ -210,7 +210,7 @@ export default function PortfolioOS() {
   const handleDragEnd = () => setIsDragging(false);
 
   const MAX_DAILY_CALLS = 50;
-  const AI_USAGE_STORAGE_KEY = 'portfolio_ai_usage_v2';
+  const AI_USAGE_STORAGE_KEY = 'portofolio_ai_usage_v2';
   const getAiQuotaExceededMessage = () => 'Batas penggunaan AI untuk hari ini sudah tercapai. Coba lagi besok.';
 
   const getAiUsageSnapshot = () => {
@@ -264,7 +264,7 @@ export default function PortfolioOS() {
     return context;
   };
 
-  const getPortfolioAiContext = () => getVfsContext(vfs).slice(0, 7000);
+  const getPortofolioAiContext = () => getVfsContext(vfs).slice(0, 7000);
   const getTerminalAiContext = () => getVfsContext(vfs).slice(0, 4200);
   const isAiAvailable = systemHealth?.services?.ai;
   const hasProtectedAccess = siteAccessMode === 'verified';
@@ -335,10 +335,10 @@ export default function PortfolioOS() {
     }
 
     setIsGeneratingPitch(true);
-    const portfolioData = getPortfolioAiContext();
-    const prompt = `Berdasarkan data portfolio berikut:\n${portfolioData}\n\nBuatkan sebuah "Elevator Pitch" atau paragraf persuasif singkat (maksimal 2-3 paragraf) yang menjelaskan mengapa saya (pemilik portfolio ini) adalah kandidat yang sangat berharga untuk direkrut.`;
+    const portofolioData = getPortofolioAiContext();
+    const prompt = `Berdasarkan data portofolio berikut:\n${portofolioData}\n\nBuatkan sebuah "Elevator Pitch" atau paragraf persuasif singkat (maksimal 2-3 paragraf) yang menjelaskan mengapa saya (pemilik portofolio ini) adalah kandidat yang sangat berharga untuk direkrut.`;
 
-    const systemInstruction = `Kamu adalah representasi profesional dari pemilik portfolio.
+    const systemInstruction = `Kamu adalah representasi profesional dari pemilik portofolio.
 ATURAN SANGAT KETAT:
 1. LANGSUNG berikan isi pitch. DILARANG KERAS menggunakan kalimat basa-basi pengantar/penutup.
 2. Gunakan bahasa Indonesia formal, elegan, dan to the point.
@@ -358,7 +358,7 @@ ATURAN SANGAT KETAT:
     if (!trimmedCmd) return;
 
     const newId = Date.now();
-    const promptStr = `hamk4dev@portfolio:~${currentPath.length > 0 ? '/' + currentPath.join('/') : ''}$ ${trimmedCmd}`;
+    const promptStr = `hamk4dev@portofolio:~${currentPath.length > 0 ? '/' + currentPath.join('/') : ''}$ ${trimmedCmd}`;
     
     let newHistory = [...history, { id: newId, type: 'input', text: promptStr }];
     
@@ -396,7 +396,7 @@ ATURAN SANGAT KETAT:
           print('  search   : Mencari file atau teks tertentu');
           
           print('\n[ UTILITIES & AI ]');
-          print('  ai <msg> : Mengobrol dengan AI Copilot Portfolio');
+          print('  ai <msg> : Mengobrol dengan AI Copilot Portofolio');
           print('  whoami   : Menampilkan identitas OS dan Jaringan Anda');
           
           print('\n[ SECURITY TOOLS ]');
@@ -723,19 +723,19 @@ ATURAN SANGAT KETAT:
           setIsGenerating(true);
           setActiveTask('AI sedang memproses...');
           
-          const portfolioData = getTerminalAiContext();
+          const portofolioData = getTerminalAiContext();
           const strictSystemPrompt = `
 Kamu adalah AI Copilot khusus untuk "Init.CV".
-Tugas utamamu HANYA menjawab pertanyaan seputar pemilik portfolio ini.
+Tugas utamamu HANYA menjawab pertanyaan seputar pemilik portofolio ini.
 
 ATURAN SANGAT KETAT:
-1. Basis Pengetahuan: Kamu HANYA boleh menggunakan informasi dari "DATA PORTFOLIO" yang diberikan pada prompt pengguna.
+1. Basis Pengetahuan: Kamu HANYA boleh menggunakan informasi dari "DATA PORTOFOLIO" yang diberikan pada prompt pengguna.
 2. Pembatasan Scope: JANGAN PERNAH menjawab pertanyaan umum.
 3. Format Jawaban: Jawab langsung ke intinya, profesional, singkat, bahasa Indonesia.
 4. DILARANG menggunakan simbol markdown tebal/bintang.
 `;
 
-          const aiPrompt = `DATA PORTFOLIO:\n${portfolioData}\n\nPERTANYAAN PENGGUNA:\n${prompt}`;
+          const aiPrompt = `DATA PORTOFOLIO:\n${portofolioData}\n\nPERTANYAAN PENGGUNA:\n${prompt}`;
 
           callGemini(aiPrompt, strictSystemPrompt)
             .then(res => {
@@ -872,27 +872,27 @@ ATURAN SANGAT KETAT:
   const useFocusedToolLayout = Boolean(selectedNode) && isSmartphoneViewport;
 
   return (
-    <div className="flex flex-col h-[100svh] md:h-[100dvh] bg-slate-950 text-slate-300 font-sans overflow-hidden">
+    <div className="portofolio-shell flex flex-col h-[100svh] md:h-[100dvh] bg-slate-950 text-slate-300 font-sans overflow-hidden">
       <GlobalTurnstileGate
         onVerified={refreshSystemHealth}
         onAccessStateChange={setSiteAccessMode}
         reopenSignal={turnstileReopenSignal}
       />
       
-      <header className="flex items-center justify-between px-3 sm:px-4 py-3 bg-slate-900 border-b border-slate-800 shadow-sm z-10 shrink-0">
+      <header className="portofolio-surface-theme portofolio-header flex items-center justify-between px-3 sm:px-4 py-3 bg-slate-900 border-b border-slate-800 shadow-sm z-10 shrink-0">
         <div className="flex items-center space-x-2 overflow-hidden">
-          <Monitor className="w-5 h-5 text-emerald-400 shrink-0" />
+          <Monitor className="portofolio-brand-mark w-5 h-5 text-emerald-400 shrink-0" />
           <h1 className="font-semibold text-slate-200 tracking-wide truncate text-sm sm:text-base">Init.CV <span className="hidden sm:inline">v1.0.0</span></h1>
           
           <button
              onClick={handleGeneratePitch}
-             className="ml-2 sm:ml-4 flex items-center bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 px-2.5 sm:px-3 py-1.5 rounded-full text-[10px] sm:text-xs border border-indigo-500/30 font-medium transition-colors shadow-[0_0_10px_rgba(99,102,241,0.1)] hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] whitespace-nowrap"
+             className="portofolio-header-action ml-2 sm:ml-4 flex items-center bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 px-2.5 sm:px-3 py-1.5 rounded-full text-[10px] sm:text-xs border border-indigo-500/30 font-medium transition-colors shadow-[0_0_10px_rgba(99,102,241,0.1)] hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] whitespace-nowrap"
           >
              <Rocket className="w-3.5 h-3.5 sm:mr-1.5" /> <span className="hidden sm:inline">Elevator Pitch</span><span className="sm:hidden ml-1">Pitch</span>
           </button>
         </div>
         
-        <div className="hidden sm:flex items-center space-x-3 text-[10px] lg:text-xs font-mono bg-slate-950 px-3 py-1.5 rounded-md border border-slate-700/80 shrink-0 shadow-inner">
+        <div className="portofolio-header-status hidden sm:flex items-center space-x-3 text-[10px] lg:text-xs font-mono bg-slate-950 px-3 py-1.5 rounded-md border border-slate-700/80 shrink-0 shadow-inner">
           <div className="flex items-center text-emerald-400">
             <Cpu className="w-3.5 h-3.5 mr-1.5 opacity-80" />
             <span className="font-semibold tracking-widest">SYS: ACTIVE</span>
@@ -906,7 +906,7 @@ ATURAN SANGAT KETAT:
       </header>
 
       {siteAccessMode === 'limited' && (
-        <div className="shrink-0 border-b border-amber-500/20 bg-amber-950/30 px-4 py-3 text-xs sm:text-sm text-amber-100">
+        <div className="portofolio-surface-theme portofolio-notice shrink-0 border-b border-amber-500/20 bg-amber-950/30 px-4 py-3 text-xs sm:text-sm text-amber-100">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <span>Situs dibuka dalam mode terbatas. Beberapa fitur baru tersedia setelah akses penuh aktif.</span>
             <button
@@ -921,7 +921,7 @@ ATURAN SANGAT KETAT:
         </div>
       )}
 
-      <div className="md:hidden flex overflow-x-auto space-x-2 p-2 bg-slate-900 border-b border-slate-800 font-mono text-xs shrink-0 scrollbar-hide">
+      <div className="portofolio-surface-theme portofolio-toolbar md:hidden flex overflow-x-auto space-x-2 p-2 bg-slate-900 border-b border-slate-800 font-mono text-xs shrink-0 scrollbar-hide">
         <button onClick={() => handleGuiAction('home')} className="flex items-center px-3 py-1.5 bg-slate-800 rounded hover:bg-slate-700 whitespace-nowrap"><Home className="w-3 h-3 mr-1"/> Root</button>
         <button onClick={() => handleGuiAction('back')} className="flex items-center px-3 py-1.5 bg-slate-800 rounded hover:bg-slate-700 whitespace-nowrap"><ArrowLeft className="w-3 h-3 mr-1"/> Back</button>
         <button onClick={() => executeCommand('ls')} className="flex items-center px-3 py-1.5 bg-slate-800 rounded hover:bg-slate-700 whitespace-nowrap"><List className="w-3 h-3 mr-1"/> ls</button>
@@ -978,7 +978,7 @@ ATURAN SANGAT KETAT:
             {!isGenerating && !activeTask && (
               <div className="flex items-center text-slate-200 mt-2 text-sm flex-row animate-in fade-in duration-300">
                 <span className="text-emerald-400 mr-2 flex-shrink-0">
-                  hamk4dev@portfolio:<span className="text-blue-400">{pathDisplay}</span>$
+                  hamk4dev@portofolio:<span className="text-blue-400">{pathDisplay}</span>$
                 </span>
                 <input
                   ref={inputRef}
@@ -1000,7 +1000,7 @@ ATURAN SANGAT KETAT:
 
         {!useFocusedToolLayout && (
           <div
-            className={`flex items-center justify-center bg-slate-800 transition-colors z-20 shrink-0
+            className={`portofolio-divider flex items-center justify-center bg-slate-800 transition-colors z-20 shrink-0
               ${isDragging ? 'bg-indigo-500' : 'hover:bg-slate-600'}
               md:w-1 md:h-full md:cursor-col-resize
               w-full h-1 cursor-row-resize
@@ -1018,9 +1018,9 @@ ATURAN SANGAT KETAT:
 
         <section 
           style={useFocusedToolLayout ? undefined : { flexGrow: 100 - splitRatio, flexBasis: 0 }}
-          className="flex flex-col bg-slate-900 overflow-hidden min-w-0 min-h-0"
+          className="portofolio-surface-theme portofolio-preview flex flex-col bg-slate-900 overflow-hidden min-w-0 min-h-0"
         >
-          <div className="flex items-center justify-between px-4 py-2 bg-slate-800/50 border-b border-slate-800 text-sm shrink-0">
+          <div className="portofolio-preview-bar flex items-center justify-between px-4 py-2 bg-slate-800/50 border-b border-slate-800 text-sm shrink-0">
             <div className="flex items-center overflow-x-auto scrollbar-hide whitespace-nowrap flex-1 min-w-0 pr-4">
               <button onClick={() => handleGuiAction('home')} className="text-slate-400 hover:text-emerald-400 transition-colors shrink-0">
                 <Home className="w-4 h-4" />
@@ -1053,7 +1053,7 @@ ATURAN SANGAT KETAT:
             </div>
           </div>
 
-          <div ref={previewViewportRef} className="flex-1 p-4 sm:p-6 overflow-y-auto min-h-0">
+          <div ref={previewViewportRef} className="portofolio-preview-body flex-1 p-4 sm:p-6 overflow-y-auto min-h-0">
             {selectedNode ? (
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 {isAppNode ? (
@@ -1318,13 +1318,13 @@ ATURAN SANGAT KETAT:
         )}
       </main>
 
-      <footer className="shrink-0 bg-slate-900 border-t border-slate-800 py-2 px-4 flex justify-center items-center text-[10px] sm:text-xs text-slate-500 font-mono z-10 text-center">
+      <footer className="portofolio-surface-theme portofolio-footer shrink-0 bg-slate-900 border-t border-slate-800 py-2 px-4 flex justify-center items-center text-[10px] sm:text-xs text-slate-500 font-mono z-10 text-center">
         <span>&copy; 2026 | Powered By <span className="text-emerald-400 font-medium">hamk4dev</span>. Hak cipta dilindungi undang-undang.</span>
       </footer>
 
       {showPitchModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-indigo-500/30 p-4 sm:p-6 rounded-xl max-w-lg w-full max-h-[90dvh] flex flex-col shadow-2xl relative animate-in zoom-in-95 duration-200">
+        <div className="portofolio-modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="portofolio-surface-theme portofolio-modal-card bg-slate-900 border border-indigo-500/30 p-4 sm:p-6 rounded-xl max-w-lg w-full max-h-[90dvh] flex flex-col shadow-2xl relative animate-in zoom-in-95 duration-200">
             <button 
               onClick={() => setShowPitchModal(false)} 
               className="absolute top-3 right-3 sm:top-4 sm:right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-800/80 text-slate-300 hover:text-red-400 hover:bg-slate-700 transition-colors z-10"
