@@ -117,7 +117,7 @@ async function sendScanAccessRequest({ name, contact, reason, toolName, targetTy
   const timestamp = new Date().toISOString();
 
   const html = `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #11100E;">
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
       <h2>Permintaan Akses Pengujian Penuh</h2>
       <p>Pengguna meminta akses pengujian penuh untuk target yang belum tersedia langsung dari tool.</p>
       <p><strong>Tool:</strong> ${escapeHtml(toolName)}</p>

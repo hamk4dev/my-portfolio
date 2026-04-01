@@ -53,7 +53,7 @@ function validatePayload(payload) {
 
 async function sendContactEmail({ name, email, subject, message }) {
   const html = `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #11100E;">
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
       <h2>Pesan Baru Dari Contact Hub</h2>
       <p><strong>Nama:</strong> ${escapeHtml(name)}</p>
       <p><strong>Email:</strong> ${escapeHtml(email)}</p>
