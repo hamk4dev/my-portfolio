@@ -16,6 +16,7 @@
   --portofolio-accent-primary-soft: rgba(214, 181, 129, 0.2);
   --portofolio-accent-secondary: #8FAE9E;
   --portofolio-accent-secondary-soft: rgba(143, 174, 158, 0.2);
+  --portofolio-cli-green: #74f7a6;
   --portofolio-danger: #B9847A;
   --portofolio-danger-soft: rgba(185, 132, 122, 0.22);
   --portofolio-shadow: rgba(0, 0, 0, 0.46);
@@ -98,13 +99,15 @@ body {
 }
 
 .portofolio-theme .portofolio-cli-panel {
-  background: linear-gradient(180deg, rgba(14, 12, 11, 0.96), rgba(10, 9, 8, 0.98)) !important;
+  background: #000000 !important;
   border-right: 1px solid var(--portofolio-border);
+  box-shadow: inset -1px 0 0 rgba(214, 181, 129, 0.08);
 }
 
 .portofolio-theme .portofolio-cli-header {
   letter-spacing: 0.08em;
   color: var(--portofolio-text-muted) !important;
+  background: linear-gradient(180deg, rgba(12, 10, 9, 0.98), rgba(4, 4, 4, 1)) !important;
 }
 
 .portofolio-theme .portofolio-cli-header svg {
@@ -404,7 +407,7 @@ body {
   border: none !important;
   box-shadow: none !important;
   color: var(--portofolio-text-primary) !important;
-  caret-color: var(--portofolio-accent-primary);
+  caret-color: var(--portofolio-cli-green);
 }
 
 .portofolio-theme .portofolio-cli-input:focus {
@@ -413,8 +416,66 @@ body {
   box-shadow: none !important;
 }
 
+.portofolio-theme .portofolio-cli-prompt {
+  color: var(--portofolio-cli-green) !important;
+  text-shadow: 0 0 10px rgba(116, 247, 166, 0.16);
+}
+
+.portofolio-theme .portofolio-cli-path {
+  color: var(--portofolio-cli-green) !important;
+}
+
+.portofolio-theme .portofolio-map-card {
+  background:
+    linear-gradient(180deg, rgba(31, 26, 22, 0.8), rgba(20, 17, 15, 0.92)) !important;
+  border-color: rgba(214, 181, 129, 0.22) !important;
+}
+
+.portofolio-theme .portofolio-map-shell {
+  border-color: rgba(214, 181, 129, 0.26) !important;
+  background:
+    radial-gradient(circle at top, rgba(214, 181, 129, 0.14), transparent 40%),
+    linear-gradient(180deg, rgba(27, 23, 20, 0.94), rgba(14, 12, 11, 0.98)) !important;
+  box-shadow:
+    0 18px 30px rgba(0, 0, 0, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.portofolio-theme .portofolio-map-placeholder {
+  background:
+    radial-gradient(circle at top, rgba(214, 181, 129, 0.16), transparent 52%),
+    linear-gradient(180deg, rgba(35, 29, 25, 0.98), rgba(14, 12, 11, 1)) !important;
+}
+
+.portofolio-theme .portofolio-map-badge {
+  border-color: rgba(214, 181, 129, 0.28) !important;
+  background-color: rgba(214, 181, 129, 0.12) !important;
+  color: var(--portofolio-accent-primary) !important;
+}
+
+.portofolio-theme .portofolio-map-action {
+  border-color: rgba(214, 181, 129, 0.34) !important;
+  background: linear-gradient(135deg, rgba(214, 181, 129, 0.2), rgba(214, 181, 129, 0.1)) !important;
+  color: var(--portofolio-accent-primary) !important;
+}
+
+.portofolio-theme .portofolio-map-action:hover {
+  background: linear-gradient(135deg, rgba(214, 181, 129, 0.28), rgba(214, 181, 129, 0.16)) !important;
+}
+
 .portofolio-theme iframe[title='Lokasi Kontak'] {
-  filter: saturate(0.58) hue-rotate(-18deg) brightness(0.9) contrast(0.93);
+  filter: saturate(0.42) hue-rotate(-24deg) brightness(0.82) contrast(0.94);
+}
+
+.portofolio-theme .portofolio-map-iframe {
+  position: relative;
+}
+
+.portofolio-theme .portofolio-map-tint {
+  background:
+    linear-gradient(180deg, rgba(14, 12, 11, 0.08), rgba(14, 12, 11, 0.18)),
+    radial-gradient(circle at top, rgba(214, 181, 129, 0.08), transparent 46%);
+  mix-blend-mode: multiply;
 }
 
 .portofolio-theme :is(.decoration-blue-500\/30, .decoration-emerald-500\/30) {

@@ -977,8 +977,8 @@ ATURAN SANGAT KETAT:
             
             {!isGenerating && !activeTask && (
               <div className="flex items-center text-slate-200 mt-2 text-sm flex-row animate-in fade-in duration-300">
-                <span className="text-emerald-400 mr-2 flex-shrink-0">
-                  hamk4dev@portofolio:<span className="text-blue-400">{pathDisplay}</span>$
+                <span className="portofolio-cli-prompt mr-2 flex-shrink-0">
+                  hamk4dev@portofolio:<span className="portofolio-cli-path">{pathDisplay}</span>$
                 </span>
                 <input
                   ref={inputRef}
@@ -1223,7 +1223,7 @@ ATURAN SANGAT KETAT:
                           <div className={`rounded-2xl border px-4 py-5 sm:px-5 sm:py-6 ${node.coverTone ?? 'bg-gradient-to-br from-emerald-500/20 via-slate-900 to-slate-950 border-emerald-500/30'}`}>
                             <div className="mb-6 flex items-start justify-between gap-3">
                               <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-200/80">
-                                {node.category ?? (node.type === 'dir' ? 'Folder' : 'Reading')}
+                                {node.category ?? (node.type === 'dir' ? 'Direktori' : 'Referensi')}
                               </span>
                               <BookOpen className="h-5 w-5 shrink-0 text-slate-100/70" />
                             </div>
@@ -1232,7 +1232,7 @@ ATURAN SANGAT KETAT:
                                 {node.title ?? name.replace(/\.md$/i, '')}
                               </h3>
                               <p className="text-xs uppercase tracking-[0.3em] text-slate-200/70">
-                                {node.author ?? 'Online Resource'}
+                                {node.author ?? 'Referensi Online'}
                               </p>
                             </div>
                           </div>
@@ -1242,9 +1242,9 @@ ATURAN SANGAT KETAT:
                               {node.summary ?? 'Bacaan online yang dapat dibuka dari panel preview ini.'}
                             </p>
                             <div className="flex items-center justify-between text-xs">
-                              <span className="font-medium text-emerald-300">Buka bacaan</span>
+                              <span className="font-medium text-emerald-300">Buka referensi</span>
                               <span className="text-slate-500 transition-colors group-hover:text-slate-300">
-                                {node.type === 'dir' ? 'Masuk folder' : 'Lihat detail'}
+                                {node.type === 'dir' ? 'Buka direktori' : 'Lihat konten'}
                               </span>
                             </div>
                           </div>

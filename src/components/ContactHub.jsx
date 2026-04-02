@@ -152,21 +152,24 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
             </a>
           </div>
 
-          <div className="min-w-0 rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
+          <div className="portofolio-map-card min-w-0 rounded-2xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Peta</div>
-            <div className="mt-4 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/80">
+            <div className="portofolio-map-shell relative mt-4 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/80">
               {showInlineMap ? (
-                <iframe
-                  title="Lokasi Kontak"
-                  src={contactInfo.mapEmbedUrl}
-                  loading="lazy"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  className="h-[280px] w-full border-0 sm:h-[340px] xl:h-[360px]"
-                />
+                <>
+                  <iframe
+                    title="Lokasi Kontak"
+                    src={contactInfo.mapEmbedUrl}
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    className="portofolio-map-iframe h-[280px] w-full border-0 sm:h-[340px] xl:h-[360px]"
+                  />
+                  <div className="portofolio-map-tint pointer-events-none absolute inset-0" aria-hidden="true" />
+                </>
               ) : (
-                <div className="flex h-[280px] w-full flex-col justify-between bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_55%),linear-gradient(180deg,_rgba(15,23,42,0.96),_rgba(2,6,23,1))] p-5 sm:h-[340px] sm:p-6 xl:h-[360px]">
+                <div className="portofolio-map-placeholder flex h-[280px] w-full flex-col justify-between p-5 sm:h-[340px] sm:p-6 xl:h-[360px]">
                   <div className="min-w-0">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
+                    <div className="portofolio-map-badge inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300">
                       Peta
                     </div>
                     <h4 className="mt-4 text-lg font-semibold text-slate-100">Tampilkan peta</h4>
@@ -179,7 +182,7 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
                     <button
                       type="button"
                       onClick={() => setShowInlineMap(true)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/20"
+                      className="portofolio-map-action inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-500/20"
                     >
                       <MapPin className="h-4 w-4" />
                       Tampilkan Peta
@@ -303,4 +306,5 @@ export default function ContactHub({ systemHealth, siteAccessMode = 'blocked' })
     </div>
   );
 }
+
 
