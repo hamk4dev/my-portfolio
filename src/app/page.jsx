@@ -248,7 +248,8 @@ export default function PortofolioOS() {
     } catch {}
   };
 
-  // Client guard only. API routes still enforce server-side validation and rate limiting.
+  // Pembatasan di sisi klien hanya untuk pengalaman penggunaan.
+  // Validasi utama dan rate limiting tetap diproses di API.
   const getVfsContext = (node, path = '') => {
     let context = '';
     if (node.type === 'file') {
@@ -392,7 +393,7 @@ ATURAN SANGAT KETAT:
           
           print('\n[ MANAJEMEN FILE ]');
           print('  cat <file>: Menampilkan isi file di terminal');
-          print('  open <file>: Membuka file di panel GUI sebelah kanan');
+          print('  open <file>: Membuka file di panel pratinjau sebelah kanan');
           print('  search   : Mencari file atau teks tertentu');
           
           print('\n[ UTILITIES & AI ]');
@@ -402,8 +403,8 @@ ATURAN SANGAT KETAT:
           print('\n[ SECURITY TOOLS ]');
           print('  webscan <url>   : Menjalankan Web Security Scanner (CLI Mode)');
           print('  mailauth <domain>: Menjalankan Email Auth Analyzer (CLI Mode)');
-          print('  open tools/webscan.app : Membuka Web Security Scanner di panel GUI');
-          print('  open tools/mailauth.app: Membuka Email Auth Analyzer di panel GUI');
+          print('  open tools/webscan.app : Membuka Web Security Scanner di panel pratinjau');
+          print('  open tools/mailauth.app: Membuka Email Auth Analyzer di panel pratinjau');
           print('===================================================');
           break;
 
@@ -1072,18 +1073,12 @@ ATURAN SANGAT KETAT:
                             setAiSummary(null);
                           }}
                           className={isContactApp
-                            ? 'w-full sm:w-auto text-[10px] sm:text-xs bg-slate-800 hover:bg-slate-700 px-2.5 sm:px-3 py-1.5 rounded text-slate-300 transition-colors whitespace-nowrap'
-                            : 'inline-flex w-full sm:w-auto items-center justify-center rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-300 shadow-sm transition-colors hover:border-slate-600 hover:text-white'
+                            ? 'portofolio-preview-close inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg px-3 py-2 text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap'
+                            : 'portofolio-preview-close inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-lg px-3.5 py-2.5 text-xs sm:text-sm font-medium transition-all whitespace-nowrap'
                           }
                         >
-                          {isContactApp ? (
-                            'Tutup Preview'
-                          ) : (
-                            <>
-                              <CornerDownLeft className="mr-2 h-4 w-4 shrink-0" />
-                              Kembali
-                            </>
-                          )}
+                          <CornerDownLeft className="h-4 w-4 shrink-0" />
+                          {isContactApp ? 'Tutup Preview' : 'Kembali'}
                         </button>
                       </div>
                     </div>
@@ -1145,8 +1140,9 @@ ATURAN SANGAT KETAT:
                             setSelectedNode(null);
                             setAiSummary(null);
                           }}
-                          className="text-[10px] sm:text-xs bg-slate-800 hover:bg-slate-700 px-2 sm:px-3 py-1.5 rounded text-slate-300 transition-colors whitespace-nowrap"
+                          className="portofolio-preview-close inline-flex items-center gap-2 rounded-lg px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap"
                         >
+                          <CornerDownLeft className="h-3.5 w-3.5 shrink-0" />
                           Tutup Preview
                         </button>
                       </div>
@@ -1208,7 +1204,7 @@ ATURAN SANGAT KETAT:
                       <div className="flex flex-col gap-4">
                         <div className="max-w-3xl space-y-2">
                           <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Koleksi Bacaan</p>
-                          <h3 className="text-base sm:text-lg font-semibold text-slate-100">Pilihan buku dan referensi online untuk AI, security, dan engineering.</h3>
+                          <h3 className="text-base sm:text-lg font-semibold text-slate-100">Kurasi bacaan untuk AI, keamanan siber, dan rekayasa perangkat lunak.</h3>
                         </div>
                       </div>
                     </div>
@@ -1218,27 +1214,25 @@ ATURAN SANGAT KETAT:
                         <button
                           key={name}
                           onClick={() => handleGuiAction(node.type === 'dir' ? 'cd' : 'open', name)}
-                          className="group flex h-full flex-col rounded-2xl border border-slate-800 bg-slate-900/40 p-3 text-left transition-all hover:border-slate-700 hover:bg-slate-900"
+                          className="portofolio-book-card group flex h-full flex-col rounded-2xl border border-slate-800 bg-slate-900/40 p-3 text-left transition-all hover:border-slate-700 hover:bg-slate-900"
                         >
-                          <div className={`rounded-2xl border px-4 py-5 sm:px-5 sm:py-6 ${node.coverTone ?? 'bg-gradient-to-br from-emerald-500/20 via-slate-900 to-slate-950 border-emerald-500/30'}`}>
-                            <div className="mb-6 flex items-start justify-between gap-3">
-                              <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-200/80">
-                                {node.category ?? (node.type === 'dir' ? 'Direktori' : 'Referensi')}
-                              </span>
-                              <BookOpen className="h-5 w-5 shrink-0 text-slate-100/70" />
-                            </div>
-                            <div className="space-y-2">
-                              <h3 className="text-xl font-semibold leading-tight text-white">
+                          <div className={`portofolio-book-cover relative rounded-2xl border px-4 py-5 sm:px-5 sm:py-6 ${node.coverTone ?? 'bg-gradient-to-br from-emerald-500/20 via-slate-900 to-slate-950 border-emerald-500/30'}`}>
+                            <BookOpen className="pointer-events-none absolute right-4 top-5 h-5 w-5 shrink-0 text-slate-100/70 sm:right-5 sm:top-6" />
+                            <span className="portofolio-book-category inline-flex max-w-[calc(100%-2.75rem)] items-center rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-200/80">
+                              {node.category ?? (node.type === 'dir' ? 'Direktori' : 'Referensi')}
+                            </span>
+                            <div className="portofolio-book-copy space-y-2">
+                              <h3 className="portofolio-book-title text-xl font-semibold leading-tight text-white">
                                 {node.title ?? name.replace(/\.md$/i, '')}
                               </h3>
-                              <p className="text-xs uppercase tracking-[0.3em] text-slate-200/70">
+                              <p className="portofolio-book-author text-xs uppercase tracking-[0.3em] text-slate-200/70">
                                 {node.author ?? 'Referensi Online'}
                               </p>
                             </div>
                           </div>
 
                           <div className="flex flex-1 flex-col justify-between gap-4 px-1 pb-1 pt-4">
-                            <p className="text-sm leading-relaxed text-slate-400">
+                            <p className="portofolio-book-summary text-sm leading-relaxed text-slate-400">
                               {node.summary ?? 'Bacaan online yang dapat dibuka dari panel preview ini.'}
                             </p>
                             <div className="flex items-center justify-between text-xs">
@@ -1319,7 +1313,7 @@ ATURAN SANGAT KETAT:
       </main>
 
       <footer className="portofolio-main-footer shrink-0 bg-slate-900 border-t border-slate-800 py-2 px-4 flex justify-center items-center text-[10px] sm:text-xs text-slate-500 font-mono z-10 text-center">
-        <span>&copy; 2026 | Powered By <span className="text-emerald-400 font-medium">hamk4dev</span>. Hak cipta dilindungi undang-undang.</span>
+        <span>&copy; 2026 <span className="text-emerald-400 font-medium">hamk4dev</span>. Seluruh hak cipta dilindungi.</span>
       </footer>
 
       {showPitchModal && (

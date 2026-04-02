@@ -130,11 +130,35 @@ body {
 
 .portofolio-theme .portofolio-preview-header {
   border-color: var(--portofolio-border) !important;
+  background:
+    linear-gradient(180deg, rgba(27, 23, 20, 0.96), rgba(18, 16, 14, 0.98)) !important;
+  box-shadow: inset 0 -1px 0 rgba(214, 181, 129, 0.08);
 }
 
 .portofolio-theme .portofolio-time-chip {
   background: rgba(17, 15, 13, 0.72) !important;
   border-color: var(--portofolio-border) !important;
+}
+
+.portofolio-theme .portofolio-preview-close {
+  border: 1px solid rgba(214, 181, 129, 0.22) !important;
+  background:
+    linear-gradient(180deg, rgba(43, 36, 31, 0.92), rgba(24, 21, 18, 0.98)) !important;
+  color: var(--portofolio-text-primary) !important;
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.portofolio-theme .portofolio-preview-close:hover {
+  border-color: rgba(214, 181, 129, 0.34) !important;
+  background:
+    linear-gradient(180deg, rgba(58, 48, 40, 0.96), rgba(31, 27, 23, 1)) !important;
+  color: #f2ede5 !important;
+}
+
+.portofolio-theme .portofolio-preview-close svg {
+  color: var(--portofolio-accent-primary) !important;
 }
 
 .portofolio-theme .portofolio-modal-overlay {
@@ -423,6 +447,60 @@ body {
 
 .portofolio-theme .portofolio-cli-path {
   color: var(--portofolio-cli-green) !important;
+}
+
+.portofolio-theme .portofolio-book-card {
+  border-color: rgba(214, 181, 129, 0.18) !important;
+  background:
+    linear-gradient(180deg, rgba(27, 23, 20, 0.88), rgba(20, 17, 15, 0.94)) !important;
+}
+
+.portofolio-theme .portofolio-book-card:hover {
+  border-color: rgba(214, 181, 129, 0.32) !important;
+  box-shadow:
+    0 16px 32px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.portofolio-theme .portofolio-book-cover {
+  min-height: 18rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.portofolio-theme .portofolio-book-category {
+  min-height: 2.5rem;
+  align-self: flex-start;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.portofolio-theme .portofolio-book-copy {
+  margin-top: auto;
+  min-height: 7.4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.portofolio-theme .portofolio-book-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  min-height: 4.8rem;
+}
+
+.portofolio-theme .portofolio-book-author {
+  min-height: 1rem;
+}
+
+.portofolio-theme .portofolio-book-summary {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  min-height: 8.6rem;
 }
 
 .portofolio-theme .portofolio-map-card {
