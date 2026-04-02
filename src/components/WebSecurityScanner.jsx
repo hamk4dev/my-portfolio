@@ -18,32 +18,32 @@ import { runBackendWebScan, submitScanAccessRequest } from '@/services/api';
 
 const severityStyles = {
   HIGH: {
-    card: 'border-red-500/40 bg-red-950/30 text-red-200',
-    badge: 'border-red-500/40 bg-red-500/10 text-red-300',
+    card: 'border-[rgba(248,113,113,0.36)] bg-[rgba(69,10,10,0.4)] text-[#fecaca]',
+    badge: 'border-[rgba(248,113,113,0.42)] bg-[rgba(127,29,29,0.34)] text-[#fecaca]',
     Icon: ShieldAlert,
   },
   MEDIUM: {
-    card: 'border-orange-500/40 bg-orange-950/30 text-orange-200',
-    badge: 'border-orange-500/40 bg-orange-500/10 text-orange-300',
+    card: 'border-[rgba(250,204,21,0.34)] bg-[rgba(113,63,18,0.34)] text-[#fde68a]',
+    badge: 'border-[rgba(250,204,21,0.4)] bg-[rgba(133,77,14,0.3)] text-[#fef08a]',
     Icon: ShieldQuestion,
   },
   PASS: {
-    card: 'border-emerald-500/40 bg-emerald-950/30 text-emerald-200',
-    badge: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
+    card: 'border-[rgba(96,165,250,0.34)] bg-[rgba(30,58,138,0.34)] text-[#dbeafe]',
+    badge: 'border-[rgba(96,165,250,0.42)] bg-[rgba(30,64,175,0.28)] text-[#dbeafe]',
     Icon: ShieldCheck,
   },
 };
 
 const categoryStatusStyles = {
-  PASS: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
-  WARN: 'border-orange-500/30 bg-orange-500/10 text-orange-300',
-  FAIL: 'border-red-500/30 bg-red-500/10 text-red-300',
+  PASS: 'border-[rgba(96,165,250,0.34)] bg-[rgba(30,64,175,0.24)] text-[#dbeafe]',
+  WARN: 'border-[rgba(250,204,21,0.34)] bg-[rgba(133,77,14,0.24)] text-[#fde68a]',
+  FAIL: 'border-[rgba(248,113,113,0.34)] bg-[rgba(127,29,29,0.26)] text-[#fecaca]',
 };
 
 const checkStatusStyles = {
-  PASS: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200',
-  WARN: 'border-orange-500/20 bg-orange-500/10 text-orange-200',
-  FAIL: 'border-red-500/20 bg-red-500/10 text-red-200',
+  PASS: 'border-[rgba(96,165,250,0.24)] bg-[rgba(30,64,175,0.18)] text-[#dbeafe]',
+  WARN: 'border-[rgba(250,204,21,0.24)] bg-[rgba(133,77,14,0.2)] text-[#fde68a]',
+  FAIL: 'border-[rgba(248,113,113,0.24)] bg-[rgba(127,29,29,0.2)] text-[#fecaca]',
   INFO: 'border-slate-700 bg-slate-900/80 text-slate-300',
 };
 
@@ -56,15 +56,17 @@ const initialRequestForm = {
 
 function ScoreCard({ label, value, tone }) {
   const toneStyles = {
-    red: 'border-red-500/30 bg-red-950/30 text-red-300',
-    orange: 'border-orange-500/30 bg-orange-950/30 text-orange-300',
-    emerald: 'border-emerald-500/30 bg-emerald-950/30 text-emerald-300',
+    red: 'border-[rgba(248,113,113,0.36)] bg-[rgba(69,10,10,0.42)] text-[#fca5a5]',
+    yellow: 'border-[rgba(250,204,21,0.34)] bg-[rgba(113,63,18,0.38)] text-[#fde68a]',
+    blue: 'border-[rgba(96,165,250,0.34)] bg-[rgba(30,58,138,0.38)] text-[#bfdbfe]',
   };
 
   return (
-    <div className={`rounded-2xl border p-4 text-center ${toneStyles[tone]}`}>
-      <div className="text-3xl font-bold">{value}</div>
-      <div className="mt-1 text-xs uppercase tracking-[0.2em] opacity-80">{label}</div>
+    <div className={`flex min-h-[11rem] min-w-0 flex-col items-center overflow-hidden rounded-2xl border px-4 py-5 text-center ${toneStyles[tone]}`}>
+      <div className="text-4xl font-bold leading-none sm:text-5xl">{value}</div>
+      <div className="mt-4 max-w-[10ch] break-words text-[11px] font-semibold uppercase leading-5 tracking-[0.16em] opacity-90">
+        {label}
+      </div>
     </div>
   );
 }
@@ -202,10 +204,9 @@ export default function WebSecurityScanner({ siteAccessMode = 'blocked' }) {
 
   const scoreTone =
     !result ? 'text-slate-200 border-slate-700 bg-slate-900/80' :
-    result.score >= 85 ? 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10' :
-    result.score >= 70 ? 'text-blue-300 border-blue-500/30 bg-blue-500/10' :
-    result.score >= 50 ? 'text-orange-300 border-orange-500/30 bg-orange-500/10' :
-    'text-red-300 border-red-500/30 bg-red-500/10';
+    result.score >= 80 ? 'border-[rgba(96,165,250,0.34)] bg-[rgba(30,58,138,0.34)] text-[#bfdbfe]' :
+    result.score >= 55 ? 'border-[rgba(250,204,21,0.34)] bg-[rgba(113,63,18,0.36)] text-[#fde68a]' :
+    'border-[rgba(248,113,113,0.36)] bg-[rgba(69,10,10,0.4)] text-[#fca5a5]';
 
   return (
     <div className="space-y-6">
@@ -349,22 +350,22 @@ export default function WebSecurityScanner({ siteAccessMode = 'blocked' }) {
         <div className="space-y-6">
           <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-4 sm:p-5">
             <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1.9fr)]">
-              <div className={`min-w-0 rounded-3xl border p-5 ${scoreTone}`}>
-                <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Skor Keseluruhan</div>
-                <div className="mt-3 text-5xl font-bold">{result.score}</div>
-                <div className="mt-3 inline-flex rounded-full border px-3 py-1 text-sm font-semibold">
+              <div className={`min-w-0 overflow-hidden rounded-3xl border p-5 ${scoreTone}`}>
+                <div className="max-w-[16ch] text-xs uppercase leading-5 tracking-[0.18em] text-slate-300/80">Skor Keseluruhan</div>
+                <div className="mt-3 text-5xl font-bold leading-none">{result.score}</div>
+                <div className="mt-3 inline-flex max-w-full rounded-full border border-current/60 px-3 py-1 text-sm font-semibold text-current">
                   Grade {result.grade}
                 </div>
                 <div className="mt-5">
-                  <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Target</div>
-                  <div className="mt-2 break-all text-xs leading-6 text-slate-300">{result.target}</div>
+                  <div className="text-[11px] uppercase tracking-[0.16em] text-slate-300/70">Target</div>
+                  <div className="mt-2 break-all text-xs leading-6 text-slate-100">{result.target}</div>
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid auto-rows-fr gap-4 sm:grid-cols-3">
                 <ScoreCard label="Kritis" value={result.highCount || 0} tone="red" />
-                <ScoreCard label="Peringatan" value={result.medCount || 0} tone="orange" />
-                <ScoreCard label="Aman" value={result.lowCount || 0} tone="emerald" />
+                <ScoreCard label="Peringatan" value={result.medCount || 0} tone="yellow" />
+                <ScoreCard label="Aman" value={result.lowCount || 0} tone="blue" />
               </div>
             </div>
 
