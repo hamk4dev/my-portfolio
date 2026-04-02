@@ -1,11 +1,19 @@
+# Build output
 .next/
+
+# Local tooling
 .tools/
 node_modules/
+.vs/
+
+# Development logs
 npm-debug.log*
 .next-dev*.log
 .next-dev*.err.log
 .next-dev.stdout.log
 .next-dev.stderr.log
+
+# Local environment files
 .env.local
 .env*.local
 !.env.example

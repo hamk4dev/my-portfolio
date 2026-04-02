@@ -1,3 +1,4 @@
+// Security-oriented default headers for the public portfolio surface.
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -24,6 +25,7 @@ const nextConfig = {
       {
         source: '/:path*',
         headers: [
+          // Keep the application surface minimal and explicit across all routes.
           { key: 'Content-Security-Policy', value: contentSecurityPolicy },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
